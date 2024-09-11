@@ -28,10 +28,15 @@ Two Libraries are currently present:
 
 ### 2) Do a full build
 
-You should do a full-build at least once via command line so that libraries (static and shared) are created, both for Release and Debug:
+A full-build at least once via command line is necessary, so that libraries (static and shared) are created, both for Release and Debug:
 
 ```bash
 ./cbuild.sh -t Debug
 ./cbuild.sh -t Release
 ```
 Executables can now be found under `build/`.
+
+## IMPORTANT NOTICE for WINDOWS
+
+To properly link Intel Fortran libraries, ensure that the path to the Intel Fortran library directory is set in your environment. This path is necessary to locate `ifconsol.lib`, which is required by Intel Fortran for linking when building DLLs. Set the environment variable `INTEL_FORTRAN_LIB_PATH` to the directory containing `ifconsol.lib`, typically located at `INTEL_INSTALL_PATH/Intel_fortran/compiler/latest/windows/compiler/lib/intel64_win`. Failure to set this path may result in unresolved symbols during the build process.
+
