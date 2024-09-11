@@ -46,7 +46,10 @@ set ( SRCS_DEPS_SHARED
     ../utils/log/log.cpp
     )
 
+# if compiled separately
 link_directories( ../libalg_lapack/build/${CMAKE_BUILD_TYPE} )
+# if compiled from the root directory
+link_directories( ../../build/${CMAKE_BUILD_TYPE} )
 
 add_library( obj${PROJECT_NAME} OBJECT ${SRCS}                                            )
 set_property( TARGET obj${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE 1              )
