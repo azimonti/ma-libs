@@ -1,0 +1,15 @@
+enable_language(Fortran)
+
+if (MSVC)
+    set(CMAKE_Fortran_FLAGS_DEBUG       "${CMAKE_Fortran_FLAGS_DEBUG}     /Od /warn:all /traceback /check:all"    )
+    set(CMAKE_Fortran_FLAGS_RELEASE     "/O3 /DNDEBUG /Qinline-forceinline"                                       )
+else()
+    set(CMAKE_Fortran_FLAGS_DEBUG       "${CMAKE_Fortran_FLAGS_DEBUG}     -O0 -Wall -fbacktrace -fcheck=bounds"   )
+    set(CMAKE_Fortran_FLAGS_RELEASE     "${CMAKE_Fortran_FLAGS_RELEASE}    -O3 -funroll-loops -finline-functions" )
+endif()
+
+if(APPLE)
+    SET(GNUNATIVE "-mtune=native")
+else()
+    SET(GNUNATIVE "-march=native")
+endif()
