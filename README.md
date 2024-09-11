@@ -34,6 +34,7 @@ A full-build at least once via command line is necessary, so that libraries (sta
 ./cbuild.sh -t Debug
 ./cbuild.sh -t Release
 ```
+
 Executables can now be found under `build/`.
 
 ## IMPORTANT NOTICE for WINDOWS
