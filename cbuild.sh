@@ -44,8 +44,6 @@ CONTINUOUSCOMPILE="FALSE"
 BASHSCRIPTDIR="$(cd "$(dirname "$0")" || exit; pwd)"
 CURRENTDIR="$(pwd)"
 SOURCEDIR="${CURRENTDIR}"
-if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then CURRENTBRANCH=$(git symbolic-ref --short HEAD); else CURRENTBRANCH="none"; fi
-# BUILDDIR is defined later
 
 if [[ ! -f "${SOURCEDIR}/CMakeLists.txt" ]] ; then
 	echo "CMakeLists.txt not found. Exiting..."
@@ -159,7 +157,7 @@ shift "$((OPTIND-1))"
 
 CFG=${BUILDTYPE:-Release}
 CFG=$(echo "${CFG}" | tr '[:upper:]' '[:lower:]' )
-BUILDDIR="${CURRENTDIR}/build/${CURRENTBRANCH}/${CFG}"
+BUILDDIR="${CURRENTDIR}/build/master/${CFG}"
 NBFILES="${BUILDDIR}/.nbfiles"
 BUILDTYPEFILE="${BUILDDIR}/.buildtype"
 
