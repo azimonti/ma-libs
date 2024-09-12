@@ -6,9 +6,9 @@ Since the installation is not easy (in particular on Windows it requires both in
 
 Two Libraries are currently present:
 
-- C++ BLAS/LAPACK bindings made with templates supporting different types (`float` / `double` / `std::complex<float>` / `std::complex<double>` 
+- C++ BLAS/LAPACK bindings made with templates supporting different types (`float` / `double` / `std::complex<float>` / `std::complex<double>` (built with `--cmake-params "-DLIBALG_LAPACK=ON"` or `--build-suite`)
 
-- a C++ neural network library with BLAS/LAPACK backend and HDF5 for storing the weights so that can be later reused.
+- a C++ neural network library with BLAS/LAPACK backend and HDF5 for storing the weights so that can be later reused (built with `--cmake-params "-DLIBNN=ON"` or `--build-suite`). Since it require BLAS/LAPACK will build LIBALG_LAPACK if not selected.
 
 ## Required Tools
 
@@ -31,8 +31,8 @@ Two Libraries are currently present:
 A full-build at least once via command line is necessary, so that libraries (static and shared) are created, both for Release and Debug:
 
 ```bash
-./cbuild.sh -t Debug
-./cbuild.sh -t Release
+./cbuild.sh --build-type Debug --build-suite
+./cbuild.sh --build-type Release --build-suite
 ```
 
 Executables can now be found under `build/`.

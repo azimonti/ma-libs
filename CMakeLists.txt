@@ -10,5 +10,10 @@ include( FindLIBS           )
 # used in libnn linker
 set(LIBALG_LAPACK_BUILT_FROM_ROOT ON)
 
-add_subdirectory( cpp/libalg_lapack/ )
-add_subdirectory( cpp/libnn/         )
+if(LIBALG_LAPACK OR LIBNN OR BUILDSUITE)
+  add_subdirectory( cpp/libalg_lapack/ )
+endif()
+
+if(LIBNN OR BUILDSUITE)
+  add_subdirectory( cpp/libnn/         )
+endif()
