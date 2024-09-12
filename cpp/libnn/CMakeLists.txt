@@ -10,6 +10,9 @@ set(CMAKE_CXX_STANDARD 17   )
 add_definitions( -DLOGGING -DCOUTEXT -DUSE_BLAS)
 
 if(MSVC)
+  # Other optimization are making the results incorrect for SGD
+    set(CMAKE_C_FLAGS_RELEASE       " /O1 ")
+    set(CMAKE_CXX_FLAGS_RELEASE     " /O1 ")
     generic_libs_find(hdf5   ON       )
     generic_libs_find(zlib   ON       )
     generic_libs_find(lapack ON       )
