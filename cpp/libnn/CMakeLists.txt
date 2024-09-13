@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.4)
-project(nn)
+project(cpp_nn)
 set (PROJECT_VERSION "1.0"    )
 project(${PROJECT_NAME} VERSION ${PROJECT_VERSION})
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake_modules")
@@ -77,10 +77,10 @@ endif()
 
 if(MSVC)
     target_link_libraries( ${PROJECT_NAME}
-        debug libhdf5_D debug zlibstaticd debug alg_lapackd
-        optimized libhdf5 optimized zlibstatic optimized alg_lapack)
+        debug libhdf5_D debug zlibstaticd debug cpp_alg_lapackd
+        optimized libhdf5 optimized zlibstatic optimized cpp_alg_lapack)
 else()
     target_link_libraries( ${PROJECT_NAME}
-        debug hdf5 debug alg_lapackd
-        optimized hdf5 optimized alg_lapack)
+        debug hdf5 debug cpp_alg_lapackd
+        optimized hdf5 optimized cpp_alg_lapack)
 endif()

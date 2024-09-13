@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.4)
-project( hdf5utils_f )
+project( f_hdf5utils )
 set(PROJECT_VERSION "1.0")
 project(${PROJECT_NAME} VERSION ${PROJECT_VERSION})
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake_modules")
