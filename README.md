@@ -14,6 +14,10 @@ Since the installation is not easy (in particular on Windows it requires both in
 
 - HDF5 binding library to hide the system call to HDF5 and write directly the requested type (build with `-DF_LIBHDF5UTILS=ON` or `--build-suite`).
 
+- Linear algebra routines (build with `-DF_LIBALGEBRA=ON` or `--build-suite`).
+
+- Algorithms routines (build with `-DF_LIBALGO=ON` or `--build-suite`).
+
 ## Required Tools
 
 - Git

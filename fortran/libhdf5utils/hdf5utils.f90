@@ -2,7 +2,6 @@
 !/*    hdf5utils.F90     */
 !/*    VERSION 1.0       */
 !/*     2022/09/07       */
-!/*  © MARCO AZIMONTI    */
 !/************************/
 
 MODULE HDF5UTILS
