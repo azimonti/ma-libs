@@ -5,6 +5,7 @@
 !/***************************/
 
 REAL(8) FUNCTION ADD (A, B, C, D)
+   !DEC$ ATTRIBUTES DLLEXPORT :: add
     IMPLICIT NONE
 
     REAL(8) B,D
@@ -15,6 +16,7 @@ REAL(8) FUNCTION ADD (A, B, C, D)
 END
 
 SUBROUTINE EXEC(ROUTINE)
+    !DEC$ ATTRIBUTES DLLEXPORT:: exec
     IMPLICIT NONE
 
     EXTERNAL         :: ROUTINE

@@ -5,6 +5,10 @@
 /************************/
 
 #define ST_C(x) static_cast<std::size_t>(x)
+#ifdef _MSC_VER
+#define add_ ADD
+#define exec_ EXEC
+#endif
 
 extern "C" double add_(int*, double[], int*, double[]);
 extern "C" void exec_(void (*)(double*, double*));
