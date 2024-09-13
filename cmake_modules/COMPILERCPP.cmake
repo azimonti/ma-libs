@@ -23,8 +23,9 @@ else()
 endif()
 
 if (MSVC)
-    add_compile_options(/wd4459)                        # suppress "declaration of 'identifier' hides global declaration"
-    add_compile_options(/wd4251)                        # suppress class 'type1' needs to have dll-interface to be used by clients of class 'type2'
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/wd4459>)  # suppress "declaration of 'identifier' hides global declaration"
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/wd4251>)  # suppress "class 'type1' needs to have dll-interface to be used by clients of class"
+
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)          # suppress deprecation warning for old functions (e.g. strcpy)
     add_definitions( /fp:fast )                         # common params for FPU
     add_definitions( /MP )                              # multi-process compilation
