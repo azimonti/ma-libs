@@ -29,6 +29,10 @@ if(F_LIBHDF5UTILS OR BUILDSUITE)
   add_subdirectory( fortran/libhdf5utils/ )
 endif()
 
+if(F_CPP_BINDINGS)
+  add_subdirectory( fortran/cpp_bindings/ )
+endif()
+
 if(F_LIBALGEBRA OR BUILDSUITE)
   add_subdirectory( fortran/libalgebra/   )
 endif()
