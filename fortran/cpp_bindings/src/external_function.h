@@ -6,6 +6,11 @@
 /*     2022/06/06          */
 /***************************/
 
+#ifdef _MSC_VER
+#define cfun_ CFUN
+#define cfun1_ CFUN1
+#endif
+
 #include <iostream>
 #include "shared_libraries_export.hpp"
 
