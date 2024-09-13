@@ -50,7 +50,7 @@ set ( SRCS_DEPS_SHARED
     )
 
 # Conditionally link directories based on whether libalg_lapack was built
-if(LIBALG_LAPACK_BUILT_FROM_ROOT)
+if(CPP_LIBALG_LAPACK_BUILT_FROM_ROOT)
     # if compiled from the root directory
     link_directories( ../../build/${CMAKE_BUILD_TYPE} )
 else()

@@ -4,11 +4,15 @@ This repository is containing some libraries that I have developed through the y
 
 Since the installation is not easy (in particular on Windows it requires both installation of Fortran and compilation of HDF5) I decided to create a dedicated repository, so that I can just link the relevant pre-compiled binaries whenever I need them.
 
-Two Libraries are currently present:
+## C++ 
 
-- C++ BLAS/LAPACK bindings made with templates supporting different types (`float` / `double` / `std::complex<float>` / `std::complex<double>` (built with `--cmake-params "-DLIBALG_LAPACK=ON"` or `--build-suite`)
+- C++ BLAS/LAPACK bindings made with templates supporting different types (`float` / `double` / `std::complex<float>` / `std::complex<double>` (built with `--cmake-params "-DCPP_LIBALG_LAPACK=ON"` or `--build-suite`).
 
-- a C++ neural network library with BLAS/LAPACK backend and HDF5 for storing the weights so that can be later reused (built with `--cmake-params "-DLIBNN=ON"` or `--build-suite`). Since it require BLAS/LAPACK will build LIBALG_LAPACK if not selected.
+- C++ neural network library with BLAS/LAPACK backend and HDF5 for storing the weights so that can be later reused (built with `--cmake-params "-DCPP_LIBNN=ON"` or `--build-suite`). Since it require BLAS/LAPACK will build CPP_LIBALG_LAPACK if not selected.
+
+## Fortran 
+
+- HDF5 binding library to hide the system call to HDF5 and write directly the requested type (build with `-DF_LIBHDF5UTILS=ON` or `--build-suite`).
 
 ## Required Tools
 
