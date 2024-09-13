@@ -10,6 +10,8 @@ Since the installation is not easy (in particular on Windows it requires both in
 
 - C++ neural network library with BLAS/LAPACK backend and HDF5 for storing the weights so that can be later reused (built with `--cmake-params "-DCPP_LIBNN=ON"` or `--build-suite`). Since it require BLAS/LAPACK will build CPP_LIBALG_LAPACK if not selected.
 
+- C++ Python binding allowing Python to call C++ (built with `--cmake-params "-DCPP_PYTHON_BINDINGS=ON"`). A detailed README is available [here](cpp/python_bindings/README.md).
+
 ## Fortran 
 
 - HDF5 binding library to hide the system call to HDF5 and write directly the requested type (build with `-DF_LIBHDF5UTILS=ON` or `--build-suite`).
