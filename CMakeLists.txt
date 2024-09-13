@@ -22,9 +22,13 @@ if(F_LIBHDF5UTILS OR BUILDSUITE)
 endif()
 
 if(F_LIBALGEBRA OR BUILDSUITE)
-  add_subdirectory( fortran/libalgebra )
+  add_subdirectory( fortran/libalgebra   )
 endif()
 
 if(F_LIBALGO OR BUILDSUITE)
-  add_subdirectory( fortran/libalgo )
+  add_subdirectory( fortran/libalgo      )
+endif()
+
+if(F_LIBTEST OR BUILDSUITE)
+  add_subdirectory( fortran/libtest      )
 endif()

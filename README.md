@@ -18,6 +18,8 @@ Since the installation is not easy (in particular on Windows it requires both in
 
 - Algorithms routines (build with `-DF_LIBALGO=ON` or `--build-suite`).
 
+- Testing library which produce output similar to doctest (build with `-DF_LIBTEST=ON` or `--build-suite`).
+
 ## Required Tools
 
 - Git

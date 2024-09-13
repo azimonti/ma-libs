@@ -2,7 +2,6 @@
 !/*   algebra01.f90     */
 !/*    VERSION 1.0      */
 !/*    2023/03/18       */
-!/*  © MARCO AZIMONTI   */
 !/***********************/
 
 MODULE ALGEBRA_01
