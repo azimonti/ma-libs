@@ -8,7 +8,6 @@ include(COMPILERCPP)
 # Ovewrite the c++ version
 set(CMAKE_CXX_STANDARD 17)
 
-
 if(WIN32)
     # On Windows, the pybind11 path is different
     set(CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/Lib/site-packages/pybind11/share/cmake/pybind11")
@@ -28,17 +27,32 @@ endif()
 
 set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 REQUIRED)
-pybind11_add_module(pybind11_add pybind11_add.cpp pybinding_test.cpp binding_test.cpp)
+
+
+set ( SRCS
+    ./src/main.cpp
+    )
+
+set ( SRCS_LIB
+    ./src/binding_test.cpp
+    )
+
+set ( SRCS_PYTHON_LIB
+    ./src/pybind11_add.cpp
+    ./src/pybinding_test.cpp
+    )
+
+    pybind11_add_module(pybind11_add ${SRCS_PYTHON_LIB} ${SRCS_LIB})
 
 include_directories(../utils)
 
-add_library(static_lib STATIC binding_test.cpp)
-add_library(shared_lib SHARED binding_test.cpp)
+add_library(${PROJECT_NAME}_static_lib STATIC ${SRCS_LIB})
+add_library(${PROJECT_NAME}_shared_lib SHARED ${SRCS_LIB})
 
-target_compile_definitions(shared_lib PRIVATE SHARED_LIBS_LINK BUILDING_SHARED_LIBS)
+target_compile_definitions(${PROJECT_NAME}_shared_lib PRIVATE SHARED_LIBS_LINK BUILDING_SHARED_LIBS)
 
-add_executable(main_static main.cpp)
-add_executable(main_shared main.cpp)
+add_executable(${PROJECT_NAME}_main_static ${SRCS})
+add_executable(${PROJECT_NAME}_main_shared ${SRCS})
 
-target_link_libraries(main_static static_lib)
-target_link_libraries(main_shared shared_lib)
+target_link_libraries(${PROJECT_NAME}_main_static ${PROJECT_NAME}_static_lib)
+target_link_libraries(${PROJECT_NAME}_main_shared ${PROJECT_NAME}_shared_lib)

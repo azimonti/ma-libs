@@ -20,6 +20,10 @@ if(CPP_PYTHON_BINDINGS)
   add_subdirectory( cpp/python_bindings/  )
 endif()
 
+if(CPP_FORTRAN_BINDINGS)
+  add_subdirectory( cpp/fortran_bindings/ )
+endif()
+
 # Fortran Libraries
 if(F_LIBHDF5UTILS OR BUILDSUITE)
   add_subdirectory( fortran/libhdf5utils/ )

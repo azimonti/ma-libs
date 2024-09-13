@@ -31,9 +31,11 @@ if (MSVC)
 elseif (APPLE)
     # disable OpenGL deprecation warnings
     add_definitions( -DGL_SILENCE_DEPRECATION )
-    add_compile_options(-Wall -Wextra -pedantic -Wconversion -Wno-float-conversion -Wno-c99-extensions)
+    add_compile_options(-Wall -Wextra -pedantic -Wconversion -Wno-c99-extensions)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-float-conversion>)
 else()
-    add_compile_options(-Wall -Wextra -pedantic -Wconversion -Wno-float-conversion)
+    add_compile_options(-Wall -Wextra -pedantic -Wconversion)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-float-conversion>)
 endif()
 
 if(NOUNITYBUILD)
