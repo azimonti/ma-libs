@@ -9,12 +9,20 @@ case "${unameOut}" in
 esac
 
 BASHSCRIPTDIR=$(cd "$(dirname "$0")" || exit; pwd)
-DEPENDENCIESDIR="${BASHSCRIPTDIR}/../_usr"
+DEPENDENCIESDIR="${BASHSCRIPTDIR}/usr"
 LOCALLIBSDIR="${BASHSCRIPTDIR}/../cpp/libs"
 UPDATE="FALSE"
 DOWNLOAD="FALSE"
 BUILD="FALSE"
+LIBJPGTAG="v9e"
+LIBPNGTAG="v1.6.37"
 ZLIBTAG="v1.2.12"
+GLFWTAG="3.3.7"
+GLEWTAG="glew-cmake-2.2.0"
+IMGUITAG="v1.87"
+IMGUIZMOTAG="v3.0"
+IMPLOTTAG="v0.13"
+GLMTAG="0.9.9.8"
 HDF5="hdf5-1_14_0"
 LAPACK_TAG="v3.10.1"
 
@@ -154,19 +162,40 @@ if [[ "${GLOBALDIR}" != "TRUE" ]] ; then
     mkdir -p "${SRCDIR}"
 fi
 
+if [[ "${DOWNLOAD}" == "TRUE" ]] || [[ "${UPDATE}" == "TRUE" ]] ; then
+    cd "${SRCDIR}" || exit
+    checkout_revision "imgui" "${IMGUITAG}" "https://github.com/ocornut/imgui"
+    checkout_revision "imGuIZMO.quat" "${IMGUIZMOTAG}" "https://github.com/BrutPitt/imGuIZMO.quat"
+    checkout_revision "implot" "${IMPLOTTAG}" "https://github.com/epezent/implot"
+    if [ "${MACHINE}" == "win" ]; then
+        patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/vGizmo.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/vGizmo.h.win.diff"
+    else
+        patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/vGizmo.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/vGizmo.h.diff"
+    fi
+fi
 
 if [[ "${DOWNLOAD}" == "TRUE" ]] ; then
     cd "${BASHSCRIPTDIR}" || exit
     if [ "${MACHINE}" == "macos" ]; then
         brew install cmake
         brew install zlib
+        brew install glfw
+        brew install glew
+        brew install glm
+        brew install libpng
+        brew install libjpg
         brew install lapack
-        brew install hdf5
     elif [ "${MACHINE}" == "linux" ]; then
         echo "not yet implemented"
     elif [ "${MACHINE}" == "win" ]; then
         cd "${SRCDIR}" || exit
+        checkout_revision "libjpeg" "${LIBJPGTAG}" "git@github.com:oyatsukai/libjpeg"
+        checkout_revision "libpng"  "${LIBPNGTAG}" "https://github.com/glennrp/libpng"
+        patch "${SRCDIR}/libpng/CMakeLists.txt" < "${BASHSCRIPTDIR}/patches/libpng/CMakeLists.txt.win.diff"
         checkout_revision "zlib"    "${ZLIBTAG}"      "https://github.com/madler/zlib"
+        checkout_revision "glfw"    "${GLFWTAG}"   "https://github.com/glfw/glfw"
+        checkout_revision "glew"    "${GLEWTAG}"   "https://github.com/Perlmint/glew-cmake"
+        checkout_revision "glm"     "${GLMTAG}"    "https://github.com/g-truc/glm"
         checkout_revision "hdf5"    "${HDF5}"      "https://github.com/HDFGroup/hdf5"
         checkout_revision "lapack"  "${LAPACK_TAG}"   "https://github.com/Reference-LAPACK/lapack"
         cd "${BASHSCRIPTDIR}" || exit
@@ -179,13 +208,23 @@ if [[ "${UPDATE}" == "TRUE" ]] ; then
     if [ "${MACHINE}" == "macos" ]; then
         brew upgrade cmake
         brew upgrade zlib
+        brew upgrade libpng
+        brew upgrade libjpg
+        brew upgrade glfw
+        brew upgrade glew
+        brew upgrade glm
         brew upgrade lapack
-        brew upgrade hdf5
     elif [ "${MACHINE}" == "linux" ]; then
         echo "not yet implemented"
     elif [ "${MACHINE}" == "win" ]; then
         cd "${SRCDIR}" || exit
+        checkout_revision "libjpeg"  "${LIBJPGTAG}"
+        checkout_revision "libpng"   "${LIBPNGTAG}"
+        patch "${SRCDIR}/libpng/CMakeLists.txt" < "${BASHSCRIPTDIR}/patches/libpng/CMakeLists.txt.win.diff"
         checkout_revision "zlib"     "${ZLIBTAG}"
+        checkout_revision "glfw"     "${GLFWTAG}"
+        checkout_revision "glew"     "${GLEWTAG}"
+        checkout_revision "glm"      "${GLMTAG}"
         checkout_revision "hdf5"     "${HDF5}"
         checkout_revision "lapack"   "${LAPACK_TAG}"
         cd "${BASHSCRIPTDIR}" || exit
@@ -201,12 +240,18 @@ if [[ "${BUILD}" == "TRUE" ]] ; then
         echo "not yet implemented"
     elif [ "${MACHINE}" == "win" ]; then
         build_install   zlib
+        build_install   libjpeg
+        build_lib       glfw "-DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF"
+        build_lib_local glew
+        export ZLIB_ROOT=${INSTALLDIR}
+        build_install   libpng "-DPNG_TESTS=OFF"
         build_lib       hdf5   "-DHDF5_GENERATE_HEADERS=ON -DHDF5_DISABLE_COMPILER_WARNINGS=ON -DBUILD_SHARED_LIBS=ON -DHDF5_BUILD_FORTRAN=ON -DHDF5_BUILD_CPP_LIB=ON -DHDF5_BUILD_TOOLS=OFF -DBUILD_TESTING=OFF -DHDF5_BUILD_EXAMPLES=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT=ON -DZLIB_DIR=${SRCDIR}/zlib"
         mkdir -p "${INSTALLDIR}/include/hdf5"
         cp "${BUILDDIR}/hdf5/src/h5pubconf.h" "${INSTALLDIR}/include/hdf5/h5pubconf.h"
         cp "${SRCDIR}/hdf5/src/H5FDsubfiling/H5FDsubfiling.h" "${INSTALLDIR}/include/hdf5/H5FDsubfiling.h"
         cp "${SRCDIR}/hdf5/src/H5FDsubfiling/H5FDioc.h" "${INSTALLDIR}/include/hdf5/H5FDioc.h"
         cp "${BUILDDIR}/hdf5/mod/shared/Release/"*.mod "${INSTALLDIR}/include/hdf5"
+        build_lib       matplot "-DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON"
         build_install   lapack  "-DCBLAS=ON"
         cd "${BASHSCRIPTDIR}" || exit
     fi

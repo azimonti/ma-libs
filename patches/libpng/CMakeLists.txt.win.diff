@@ -1,0 +1,10 @@
+--- ../../_usr/src/libpng/CMakeLists.txt	2022-07-06 22:08:25.996568900 +0900
++++ ../CMakeLists.txt	2022-07-06 22:07:43.426375300 +0900
+@@ -21,6 +21,7 @@
+ cmake_minimum_required(VERSION 3.1)
+ cmake_policy(VERSION 3.1)
+ 
++cmake_policy(SET CMP0074 NEW)
+ project(libpng C ASM)
+ enable_testing()
+ 
