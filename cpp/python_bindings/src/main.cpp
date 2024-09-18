@@ -2,7 +2,6 @@
 /*      main.cpp         */
 /*     Version 1.0       */
 /*      2021/04/04       */
-/*   © Marco Azimonti    */
 /*************************/
 
 #include "binding_test.h"
