@@ -105,6 +105,8 @@ void nn::ANN_MLP_SGD<T>::TrainSGD(const std::vector<std::vector<T>>& data, const
                 na_[0].assign(data[*it_]);
                 for (size_t j = 1; j < nLayers; ++j)
                 {
+                    // with MSVC and O2 / Ox the following MatMultVec with BLAS DGEMV is returning nan in nzv_[j - 1].
+                    // O1 is necessary to avoid wrong results
                     la::MatMultVec(nzv_[j - 1], vWeights[0][j - 1], na_[j - 1]);
                     nzv_[j - 1] += vBiases[0][j - 1];
                     nn::ActFunc(na_[j], nzv_[j - 1], pAct);
