@@ -32,6 +32,11 @@ Since the installation is not easy (in particular on Windows it requires both in
 - CMake
 - clang
 - Fortran
+- OpenGL
+- GLEW
+- GLFW
+- Dear ImGui
+- implot
 
 ## Quick Start
 

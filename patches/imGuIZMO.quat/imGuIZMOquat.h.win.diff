@@ -1,0 +1,18 @@
+--- /Users/marco/z_not_sync/coding/_dependencies/src/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.h	2024-09-18 19:58:25
++++ imGuIZMOquat.h	2024-09-18 20:01:05
+@@ -196,7 +196,7 @@
+     bool getTransforms(quat& q, const char* label, vec3& dir, float size) {
+         float len = length(dir);
+ 
+-        if(len<1.0 && len>= FLT_EPSILON) { normalize(dir); len = 1.0; }
++        if(len<1.0 && len>= FLT_EPSILON) { dir = normalize(dir); len = 1.0; }
+         else if(len< FLT_EPSILON) { dir = vec3(1.f, 0.f, 0.f); len = 1.0; }
+ 
+         q = angleAxis(acosf(dir.x/len), normalize(vec3(FLT_EPSILON, -dir.z, dir.y)));
+@@ -336,4 +336,4 @@
+ #endif
+ };
+ 
+-//#undef imguiGizmo_DEF_SIZE
+\ No newline at end of file
++//#undef imguiGizmo_DEF_SIZE

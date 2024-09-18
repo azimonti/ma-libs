@@ -169,8 +169,10 @@ if [[ "${DOWNLOAD}" == "TRUE" ]] || [[ "${UPDATE}" == "TRUE" ]] ; then
     checkout_revision "implot" "${IMPLOTTAG}" "https://github.com/epezent/implot"
     if [ "${MACHINE}" == "win" ]; then
         patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/vGizmo.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/vGizmo.h.win.diff"
+        patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/imGuIZMOquat.h.win.diff"
     else
         patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/vGizmo.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/vGizmo.h.diff"
+        patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/imGuIZMOquat.h.diff"
     fi
 fi
 
