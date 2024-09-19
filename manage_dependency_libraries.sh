@@ -20,7 +20,7 @@ ZLIBTAG="v1.2.12"
 GLFWTAG="3.3.7"
 GLEWTAG="glew-cmake-2.2.0"
 IMGUITAG="v1.87"
-IMGUIZMOTAG="v3.0"
+IMGUIZMOTAG="v4.0"
 IMPLOTTAG="v0.13"
 GLMTAG="0.9.9.8"
 HDF5="hdf5-1_14_0"
@@ -165,13 +165,8 @@ fi
 if [[ "${DOWNLOAD}" == "TRUE" ]] || [[ "${UPDATE}" == "TRUE" ]] ; then
     cd "${SRCDIR}" || exit
     checkout_revision "imgui" "${IMGUITAG}" "https://github.com/ocornut/imgui"
-    checkout_revision "imGuIZMO.quat" "${IMGUIZMOTAG}" "https://github.com/BrutPitt/imGuIZMO.quat"
+    checkout_revision "imGuIZMO.quat" "${IMGUIZMOTAG}" "https://github.com/azimonti/imGuIZMO.quat"
     checkout_revision "implot" "${IMPLOTTAG}" "https://github.com/epezent/implot"
-    if [ "${MACHINE}" == "win" ]; then
-        patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/imGuIZMOquat.h.win.diff"
-    else
-        patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/imGuIZMOquat.h.diff"
-    fi
 fi
 
 if [[ "${DOWNLOAD}" == "TRUE" ]] ; then
