@@ -1,6 +1,6 @@
-# Useful C++ / Fortran libraries 
+# Useful C++ / Fortran Libraries 
 
-This repository is containing some libraries that I have developed through the years and that I will reuse for other project.
+This repository contains several libraries that I have developed through the years and that can be reused for other project.
 
 Since the installation is not easy (in particular on Windows it requires both installation of Fortran and compilation of HDF5) I decided to create a dedicated repository, so that I can just link the relevant pre-compiled binaries whenever I need them.
 
@@ -35,23 +35,46 @@ Since the installation is not easy (in particular on Windows it requires both in
 - clang
 - Fortran
 - OpenGL
-- GLEW
-- GLFW
-- Dear ImGui
-- implot
 
 ## Quick Start
 
-### 1) Download and compile the external dependencies
+### 2) Download the external dependencies
 
 ```bash
 ./manage_dependency_libraries.sh --download
+```
+
+### 3) Compile the external dependencies
+
+```bash
 ./manage_dependency_libraries.sh --build
 ```
 
-### 2) Do a full build
+They will be installed under `./usr/`
 
-A full-build at least once via command line is necessary, so that libraries (static and shared) are created, both for Release and Debug:
+If the libraries are used in several projects, it is recommended to define in `.bash_profile` or `.bash_rc` the following variables:
+
+```bash
+# export local libraries folders
+
+export MA_LIBS_COMPILE_ROOT=MYPATH
+
+export USR_BUILD_DIR='${MA_LIBS_COMPILE_ROOT}/build'
+export USR_LIB_DIR='${MA_LIBS_COMPILE_ROOT}/usr'
+export USR_SRC_DIR='${MA_LIBS_COMPILE_ROOT}/src'
+```
+
+The compile with the flag `--global`:
+
+```bash
+./manage_dependency_libraries.sh --build --global
+```
+
+All projects will use this location (`FindLIBS.cmake` is looking for a global directory if a local is not present) and there is no need to recompile the dependencies at each installation of ma-libs.
+
+### 3) Compile the libraries 
+
+The below will compile most of the libraries, specific instructions (e.g. for Python bindings) require the specific compilation flags described above.
 
 ```bash
 ./cbuild.sh --build-type Debug --build-suite
