@@ -14,6 +14,8 @@ Since the installation is not easy (in particular on Windows it requires both in
 
 - C++ Fortran bindings allowing C++ to call Fortran (built with `--cmake-params "-DCPP_FORTRAN_BINDINGS=ON"`).
 
+- OpenGL multiplatform graphic engine, useful to visualize, useful fo data interpretation and presentation of numerical results in 2D and 3D (built with `--cmake-params "-DCPP_LIBGRAPHIC_ENGINE=ON"` or `--build-suite`).
+
 ## Fortran 
 
 - HDF5 bindings library to hide the system call to HDF5 and write directly the requested type (build with `-DF_LIBHDF5UTILS=ON` or `--build-suite`).
@@ -40,7 +42,7 @@ Since the installation is not easy (in particular on Windows it requires both in
 
 ## Quick Start
 
-### 1) Get the external dependencies
+### 1) Download and compile the external dependencies
 
 ```bash
 ./manage_dependency_libraries.sh --download
@@ -61,4 +63,3 @@ Executables can now be found under `build/`.
 ## IMPORTANT NOTICE for WINDOWS
 
 To properly link Intel Fortran libraries, ensure that the path to the Intel Fortran library directory is set in your environment. This path is necessary to locate `ifconsol.lib`, which is required by Intel Fortran for linking when building DLLs. Set the environment variable `INTEL_FORTRAN_LIB_PATH` to the directory containing `ifconsol.lib`, typically located at `INTEL_INSTALL_PATH/Intel_fortran/compiler/latest/windows/compiler/lib/intel64_win`. Failure to set this path may result in unresolved symbols during the build process.
-
