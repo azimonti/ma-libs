@@ -4,16 +4,6 @@
 #
 ################################################################################################
 
-if(EXISTS ${CMAKE_SOURCE_DIR}/usr/bin)
-    set(BIN_DIR ${CMAKE_SOURCE_DIR}/usr/bin)
-elseif(EXISTS ${MA_LIBS_ROOT}/usr/bin)
-    set(BIN_DIR ${MA_LIBS_ROOT}/usr/bin)
-elseif(EXISTS $ENV{USR_BUILD_DIR}/bin)
-    set(BIN_DIR $ENV{USR_BUILD_DIR}/bin)
-else()
-    message( FATAL_ERROR "no valid bin files directory found. Exiting..." )
-endif()
-
 if(EXISTS ${CMAKE_SOURCE_DIR}/usr/src)
     set(LIBS_SRC_DIR ${CMAKE_SOURCE_DIR}/usr/src)
 elseif(EXISTS ${MA_LIBS_ROOT}/usr/src)
