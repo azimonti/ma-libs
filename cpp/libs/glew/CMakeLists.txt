@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.7)
-project( glew )
+project( glew               )
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../../cmake_modules")
+include( COMPILERCOMMON     )
+include( COMPILERCPP        )
 
 cmake_policy(SET CMP0072 NEW)
 find_package(OpenGL REQUIRED)
