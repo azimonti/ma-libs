@@ -57,11 +57,11 @@ If the libraries are used in several projects, it is recommended to define in `.
 ```bash
 # export local libraries folders
 
-export MA_LIBS_COMPILE_ROOT=MYPATH
+export MA_LIBS_COMPILE_ROOT="MYPATH"
 
-export USR_BUILD_DIR='${MA_LIBS_COMPILE_ROOT}/build'
-export USR_LIB_DIR='${MA_LIBS_COMPILE_ROOT}/usr'
-export USR_SRC_DIR='${MA_LIBS_COMPILE_ROOT}/src'
+export USR_BUILD_DIR="${MA_LIBS_COMPILE_ROOT}/build"
+export USR_LIB_DIR="${MA_LIBS_COMPILE_ROOT}/usr"
+export USR_SRC_DIR="${MA_LIBS_COMPILE_ROOT}/src"
 ```
 
 The compile with the flag `--global`:
