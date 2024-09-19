@@ -10,7 +10,7 @@ esac
 
 BASHSCRIPTDIR=$(cd "$(dirname "$0")" || exit; pwd)
 DEPENDENCIESDIR="${BASHSCRIPTDIR}/usr"
-LOCALLIBSDIR="${BASHSCRIPTDIR}/../cpp/libs"
+LOCALLIBSDIR="${BASHSCRIPTDIR}/cpp/libs"
 UPDATE="FALSE"
 DOWNLOAD="FALSE"
 BUILD="FALSE"
@@ -168,10 +168,10 @@ if [[ "${DOWNLOAD}" == "TRUE" ]] || [[ "${UPDATE}" == "TRUE" ]] ; then
     checkout_revision "imGuIZMO.quat" "${IMGUIZMOTAG}" "https://github.com/BrutPitt/imGuIZMO.quat"
     checkout_revision "implot" "${IMPLOTTAG}" "https://github.com/epezent/implot"
     if [ "${MACHINE}" == "win" ]; then
-        patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/vGizmo.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/vGizmo.h.win.diff"
+        #patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/vGizmo.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/vGizmo.h.win.diff"
         patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/imGuIZMOquat.h.win.diff"
     else
-        patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/vGizmo.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/vGizmo.h.diff"
+        #patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/vGizmo.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/vGizmo.h.diff"
         patch "${SRCDIR}/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.h" < "${BASHSCRIPTDIR}/patches/imGuIZMO.quat/imGuIZMOquat.h.diff"
     fi
 fi
@@ -236,8 +236,11 @@ if [[ "${UPDATE}" == "TRUE" ]] ; then
 fi
 
 if [[ "${BUILD}" == "TRUE" ]] ; then
+    build_lib_local imgui
+    build_lib_local implot
+    build_lib_local imGuIZMO.quat
     if [ "${MACHINE}" == "macos" ]; then
-        echo "Nothing to do"
+        :
     elif [ "${MACHINE}" == "linux" ]; then
         echo "not yet implemented"
     elif [ "${MACHINE}" == "win" ]; then

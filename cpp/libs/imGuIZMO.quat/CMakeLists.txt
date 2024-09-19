@@ -1,5 +1,5 @@
-project( imguizmoquat )
 cmake_minimum_required(VERSION 3.7)
+project( imguizmoquat             )
 set(CMAKE_CXX_STANDARD 17         )
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF      )
@@ -14,7 +14,7 @@ else()
     include_directories( /usr/local/include      )
 endif()
 
-add_definitions( -DVGIZMO_USES_GLM)
+add_definitions( -DVGIZMO_USES_GLM -DGLM_ENABLE_EXPERIMENTAL )
 set( SRCS ${LIBS_ROOT}/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.cpp )
 
 add_library( ${PROJECT_NAME} STATIC ${SRCS} )
