@@ -28,7 +28,6 @@ endif()
 set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 REQUIRED)
 
-
 set ( SRCS
     ./src/main.cpp
     )

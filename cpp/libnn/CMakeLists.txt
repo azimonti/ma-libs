@@ -84,3 +84,41 @@ else()
         debug hdf5 debug cpp_alg_lapackd
         optimized hdf5 optimized cpp_alg_lapack)
 endif()
+
+if(PYTHON_BINDINGS)
+    project(cpp_nn_py)
+    if(WIN32)
+      # On Windows, the pybind11 path is different
+      set(CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/Lib/site-packages/pybind11/share/cmake/pybind11")
+    else()
+        # On macOS/Linux, use Python to detect the Python version and set the path
+        set(PYTHON_EXECUTABLE "python3")
+
+        # Get the Python version from the current virtual environment
+        execute_process(
+            COMMAND ${PYTHON_EXECUTABLE} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+            OUTPUT_VARIABLE PYTHON_VERSION
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        # Set the CMAKE_PREFIX_PATH using the detected Python version
+        set(CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/lib/python${PYTHON_VERSION}/site-packages/pybind11/share/cmake/pybind11")
+    endif()
+
+    MESSAGE("Version ${PYTHON_VERSION}")
+    set(PYBIND11_FINDPYTHON ON)
+    find_package(pybind11 REQUIRED)
+    set ( SRCS_PYTHON_LIB
+        ./src/ann_mlp_ga_py_interface.cpp
+        )
+
+    pybind11_add_module(${PROJECT_NAME} ${SRCS_PYTHON_LIB})
+    if(MSVC)
+        target_link_libraries( ${PROJECT_NAME}
+            PRIVATE debug cpp_nnd
+            PRIVATE optimized cpp_nn )
+    else()
+         target_link_libraries( ${PROJECT_NAME}
+           PRIVATE debug cpp_nnd
+           PRIVATE optimized cpp_nn )
+    endif()
+endif()

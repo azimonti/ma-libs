@@ -8,7 +8,7 @@ Since the installation is not easy (in particular on Windows it requires both in
 
 - C++ BLAS/LAPACK bindings made with templates supporting different types (`float` / `double` / `std::complex<float>` / `std::complex<double>` (built with `--cmake-params "-DCPP_LIBALG_LAPACK=ON"` or `--build-suite`).
 
-- C++ neural network library with BLAS/LAPACK backend and HDF5 for storing the weights so that can be later reused (built with `--cmake-params "-DCPP_LIBNN=ON"` or `--build-suite`). Since it require BLAS/LAPACK will build CPP_LIBALG_LAPACK if not selected.
+- C++ neural network library with BLAS/LAPACK backend and HDF5 for storing the weights so that can be later reused (built with `--cmake-params "-DCPP_LIBNN=ON"` or `--build-suite`). Since it require BLAS/LAPACK will build CPP_LIBALG_LAPACK if not selected. Optionally Python bindings can be created with the optional arguement `PYTHON_BINDINGS=ON` (so `--cmake-params "-DCPP_LIBNN=ON -DPYTHON_BINDING=ON"`). A Python virtual environment can be created if needed with the script `cpp/libnn/create_virtualenv.sh`.
 
 - C++ Python bindings allowing Python to call C++ (built with `--cmake-params "-DCPP_PYTHON_BINDINGS=ON"`). A detailed README is available [here](cpp/python_bindings/README.md).
 
