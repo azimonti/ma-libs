@@ -104,7 +104,6 @@ if(PYTHON_BINDINGS)
         set(CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/lib/python${PYTHON_VERSION}/site-packages/pybind11/share/cmake/pybind11")
     endif()
 
-    MESSAGE("Version ${PYTHON_VERSION}")
     set(PYBIND11_FINDPYTHON ON)
     find_package(pybind11 REQUIRED)
     set ( SRCS_PYTHON_LIB
