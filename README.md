@@ -1,10 +1,10 @@
-# Useful C++ / Fortran Libraries 
+# Useful C++ / Fortran Libraries
 
 This repository contains several libraries that I have developed through the years and that can be reused for other project.
 
 Since the installation is not easy (in particular on Windows it requires both installation of Fortran and compilation of HDF5) I decided to create a dedicated repository, so that I can just link the relevant pre-compiled binaries whenever I need them.
 
-## C++ 
+## C++
 
 - C++ BLAS/LAPACK bindings made with templates supporting different types (`float` / `double` / `std::complex<float>` / `std::complex<double>` (built with `--cmake-params "-DCPP_LIBALG_LAPACK=ON"` or `--build-suite`).
 
@@ -16,7 +16,7 @@ Since the installation is not easy (in particular on Windows it requires both in
 
 - OpenGL multiplatform graphic engine, useful to visualize, useful fo data interpretation and presentation of numerical results in 2D and 3D (built with `--cmake-params "-DCPP_LIBGRAPHIC_ENGINE=ON"` or `--build-suite`).
 
-## Fortran 
+## Fortran
 
 - HDF5 bindings library to hide the system call to HDF5 and write directly the requested type (build with `-DF_LIBHDF5UTILS=ON` or `--build-suite`).
 
@@ -72,7 +72,7 @@ The compile with the flag `--global`:
 
 All projects will use this location (`FindLIBS.cmake` is looking for a global directory if a local is not present) and there is no need to recompile the dependencies at each installation of ma-libs.
 
-### 3) Compile the libraries 
+### 3) Compile the libraries
 
 The below will compile most of the libraries, specific instructions (e.g. for Python bindings) require the specific compilation flags described above.
 
@@ -86,3 +86,11 @@ Executables can now be found under `build/`.
 ## IMPORTANT NOTICE for WINDOWS
 
 To properly link Intel Fortran libraries, ensure that the path to the Intel Fortran library directory is set in your environment. This path is necessary to locate `ifconsol.lib`, which is required by Intel Fortran for linking when building DLLs. Set the environment variable `INTEL_FORTRAN_LIB_PATH` to the directory containing `ifconsol.lib`, typically located at `INTEL_INSTALL_PATH/Intel_fortran/compiler/latest/windows/compiler/lib/intel64_win`. Failure to set this path may result in unresolved symbols during the build process.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+If you have any questions or want to get in touch regarding the project, please open an issue or contact the repository maintainers directly through GitHub.
