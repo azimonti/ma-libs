@@ -136,8 +136,10 @@ if(CPP_PYTHON_BINDINGS)
         $<$<CONFIG:Debug>:cpp_nnd> # Link debug nn lib in Debug config
         $<$<NOT:$<CONFIG:Debug>>:cpp_nn> # Link release nn lib in other configs (Release, etc.)
 
-        # Add missing lapack dependency revealed by otool
-        $<$<CONFIG:Debug>:cpp_alg_lapackd> # Link debug lapack lib in Debug config
-        $<$<NOT:$<CONFIG:Debug>>:cpp_alg_lapack> # Link release lapack lib in other configs
+        $<$<CONFIG:Debug>:cpp_alg_lapackd>
+        $<$<NOT:$<CONFIG:Debug>>:cpp_alg_lapack>
+
+        $<$<CONFIG:Debug>:hdf5>
+        $<$<NOT:$<CONFIG:Debug>>:hdf5>
         )
 endif()
