@@ -89,35 +89,55 @@ if(CPP_PYTHON_BINDINGS)
     project(cpp_nn_py)
     if(WIN32)
       # On Windows, the pybind11 path is different
-      set(CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/Lib/site-packages/pybind11/share/cmake/pybind11")
+      list(APPEND CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/Lib/site-packages/pybind11/share/cmake/pybind11")
     else()
         # On macOS/Linux, use Python to detect the Python version and set the path
-        set(PYTHON_EXECUTABLE "python3")
+        set(PYTHON_EXECUTABLE "python3") # Ensure this finds the venv python
 
         # Get the Python version from the current virtual environment
         execute_process(
             COMMAND ${PYTHON_EXECUTABLE} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
             OUTPUT_VARIABLE PYTHON_VERSION
             OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
         )
         # Set the CMAKE_PREFIX_PATH using the detected Python version
-        set(CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/lib/python${PYTHON_VERSION}/site-packages/pybind11/share/cmake/pybind11")
+        if(PYTHON_VERSION)
+            list(APPEND CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/lib/python${PYTHON_VERSION}/site-packages/pybind11/share/cmake/pybind11")
+        else()
+             message(WARNING "Could not determine Python version for pybind11 path.")
+        endif()
     endif()
 
+    # find_package should ideally be sufficient if paths are correct or pybind11 is installed system-wide/venv
     set(PYBIND11_FINDPYTHON ON)
     find_package(pybind11 REQUIRED)
+
+    # RPATH settings for macOS/Linux to find libs in the same build directory
+    if(NOT WIN32)
+        set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+        if(APPLE)
+            set(CMAKE_INSTALL_RPATH "@loader_path")
+        else() # Linux
+            set(CMAKE_INSTALL_RPATH "$ORIGIN")
+        endif()
+        # set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE) # Optional
+    endif()
+
     set ( SRCS_PYTHON_LIB
         ./src/ann_mlp_ga_py_interface.cpp
         )
 
     pybind11_add_module(${PROJECT_NAME} ${SRCS_PYTHON_LIB})
-    if(MSVC)
-        target_link_libraries( ${PROJECT_NAME}
-            PRIVATE debug cpp_nnd
-            PRIVATE optimized cpp_nn )
-    else()
-         target_link_libraries( ${PROJECT_NAME}
-           PRIVATE debug cpp_nnd
-           PRIVATE optimized cpp_nn )
-    endif()
+
+    # ink dependencies using generator expressions for Debug/Release
+    #    Assumes cpp_nn, cpp_nnd, cpp_alg_lapack, cpp_alg_lapackd are CMake TARGETS
+    target_link_libraries( ${PROJECT_NAME} PRIVATE
+        $<$<CONFIG:Debug>:cpp_nnd> # Link debug nn lib in Debug config
+        $<$<NOT:$<CONFIG:Debug>>:cpp_nn> # Link release nn lib in other configs (Release, etc.)
+
+        # Add missing lapack dependency revealed by otool
+        $<$<CONFIG:Debug>:cpp_alg_lapackd> # Link debug lapack lib in Debug config
+        $<$<NOT:$<CONFIG:Debug>>:cpp_alg_lapack> # Link release lapack lib in other configs
+        )
 endif()
