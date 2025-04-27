@@ -85,7 +85,7 @@ else()
         optimized hdf5 optimized cpp_alg_lapack)
 endif()
 
-if(PYTHON_BINDINGS)
+if(CPP_PYTHON_BINDINGS)
     project(cpp_nn_py)
     if(WIN32)
       # On Windows, the pybind11 path is different

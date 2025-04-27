@@ -9,7 +9,7 @@ This project demonstrates a C++ class `CppTest` with a derived Python class `PyT
 - Python bindings via **PyBind11** allow users to access C++ functions in Python, including:
   - Accessing a memory view of the integer array and double vector.
   - Viewing array/vector contents using `pybind11::memoryview`.
-  
+
 ## Installation
 
 1. **Create a Virtual Environment**:
@@ -21,7 +21,7 @@ This project demonstrates a C++ class `CppTest` with a derived Python class `PyT
 2. **Build the Project**:
 
    ```
-   ../../cbuild -t Release (or Debug) 
+   ../../cbuild -t Release (or Debug)
    ```
 
 ## Usage
@@ -31,7 +31,7 @@ After compiling the project, you can run the Python bindings.
 1. **Activate the virtual environment** (if not already activated):
 
    ```bash
-   source ../../build/python_env/activate 
+   source ../../build/python_env/activate
    ```
 
 2. **Run Python** and test the bindings:
@@ -46,7 +46,7 @@ After compiling the project, you can run the Python bindings.
 - A derived `PyTest` class provides two main functions:
   - `array_int()`: Exposes the integer array as a `pybind11::memoryview`, which allows manipulation from Python.
   - `vector_double()`: Exposes the double vector as a `pybind11::memoryview`.
-  
+
 These bindings allow seamless access to C++ data structures in Python for high performance and efficient memory management.
 
 ## Example output
@@ -78,6 +78,6 @@ Hello World!
 7
 Test String
 22
-Integer array n: 22 56 87 
-Double vector: 0.796543 0.183435 0.779691 0.59685 
+Integer array n: 22 56 87
+Double vector: 0.796543 0.183435 0.779691 0.59685
 ```
