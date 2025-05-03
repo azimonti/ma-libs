@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 '''
 /************************/
 /*   pybind11_add_p.py  */
@@ -62,6 +61,4 @@ def main():
 
 
 if __name__ == '__main__':
-    if sys.version_info[0] < 3:
-        raise RuntimeError('Must be using Python 3')
     main()

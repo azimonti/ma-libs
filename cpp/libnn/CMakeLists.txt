@@ -85,7 +85,7 @@ else()
         optimized hdf5 optimized cpp_alg_lapack)
 endif()
 
-if(CPP_PYTHON_BINDINGS)
+if(PYTHON_LIBNN)
     project(cpp_nn_py)
     if(WIN32)
       # On Windows, the pybind11 path is different
@@ -109,8 +109,8 @@ if(CPP_PYTHON_BINDINGS)
         endif()
     endif()
 
-    # find_package should ideally be sufficient if paths are correct or pybind11 is installed system-wide/venv
-    set(PYBIND11_FINDPYTHON ON)
+    cmake_policy(SET CMP0148 OLD)
+    set(PYBIND11_PYTHON_VERSION ${PYTHON_VERSION})
     find_package(pybind11 REQUIRED)
 
     # RPATH settings for macOS/Linux to find libs in the same build directory
