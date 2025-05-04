@@ -1,14 +1,14 @@
 /************************/
 /*    ann_mlp_v1.cpp    */
-/*    Version 1.0       */
-/*     2023/02/26       */
+/*    Version 2.0       */
+/*     2025/05/04       */
 /************************/
 
 #include <cassert>
 #include <cstdlib>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <fstream> // Added for file I/O
 #include <sstream>
 #if defined(USE_HDF5)
 #include "hdf5/hdf5_ext.h"
@@ -39,6 +39,11 @@ nn::ANN_MLP<T>::ANN_MLP(std::vector<size_t> size, int seed, size_t populationSiz
     nLayers = size.size();
     generator.seed(static_cast<unsigned int>(seed));
     AllocateWeightsBiases();
+}
+
+template <typename T> int nn::ANN_MLP<T>::GetVersion() const
+{
+    return nnflags::NNVersion::V1;
 }
 
 template <typename T> void nn::ANN_MLP<T>::AllocateWeightsBiases()
@@ -142,14 +147,12 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     std::stringstream ss;
     ss << generator;
     h5.write("NN/" + sName + "/generator", ss.str());
-    int v_ = nnflags::NNVersion::V1;
+    int v_ = GetVersion();
     h5.write("NN/" + sName + "/version", v_);
 #else
     // Text-based serialization
-    std::ofstream outFile(fname);
-    if (!outFile.is_open()) {
-        throw std::runtime_error("Could not open file for writing: " + fname);
-    }
+    std::ofstream outFile(fname, std::ios::binary);
+    if (!outFile.is_open()) { throw std::runtime_error("Could not open file for writing: " + fname); }
 
     outFile << "sName " << sName << "\n";
     outFile << "nEpochs " << nEpochs << "\n";
@@ -160,20 +163,19 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     outFile << "nLayers " << nLayers << "\n";
 
     outFile << "vSize ";
-    for (size_t size : vSize) {
-        outFile << size << " ";
-    }
+    for (size_t size : vSize) { outFile << size << " "; }
     outFile << "\n";
 
     outFile << "vBiases_start\n";
-    for (size_t i = 0; i < nTop; ++i) {
-        for (size_t j = 0; j < nLayers - 1; ++j) {
+    for (size_t i = 0; i < nTop; ++i)
+    {
+        for (size_t j = 0; j < nLayers - 1; ++j)
+        {
             outFile << "pop " << i << " layer " << j << "\n";
-            outFile << "dims " << vBiases[i][j].GetRowsNb() << " " << vBiases[i][j].GetColsNb() << "\n"; // Use GetRowsNb/GetColsNb
-            for (size_t r = 0; r < vBiases[i][j].GetRowsNb(); ++r) { // Use GetRowsNb
-                for (size_t c = 0; c < vBiases[i][j].GetColsNb(); ++c) { // Use GetColsNb
-                    outFile << vBiases[i][j](r, c) << " ";
-                }
+            outFile << "dims " << vBiases[i][j].GetRowsNb() << " " << vBiases[i][j].GetColsNb() << "\n";
+            for (size_t r = 0; r < vBiases[i][j].GetRowsNb(); ++r)
+            {
+                for (size_t c = 0; c < vBiases[i][j].GetColsNb(); ++c) { outFile << vBiases[i][j](r, c) << " "; }
                 outFile << "\n";
             }
         }
@@ -181,14 +183,15 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     outFile << "vBiases_end\n";
 
     outFile << "vWeights_start\n";
-    for (size_t i = 0; i < nTop; ++i) {
-        for (size_t j = 0; j < nLayers - 1; ++j) {
+    for (size_t i = 0; i < nTop; ++i)
+    {
+        for (size_t j = 0; j < nLayers - 1; ++j)
+        {
             outFile << "pop " << i << " layer " << j << "\n";
-            outFile << "dims " << vWeights[i][j].GetRowsNb() << " " << vWeights[i][j].GetColsNb() << "\n"; // Use GetRowsNb/GetColsNb
-             for (size_t r = 0; r < vWeights[i][j].GetRowsNb(); ++r) { // Use GetRowsNb
-                for (size_t c = 0; c < vWeights[i][j].GetColsNb(); ++c) { // Use GetColsNb
-                    outFile << vWeights[i][j](r, c) << " ";
-                }
+            outFile << "dims " << vWeights[i][j].GetRowsNb() << " " << vWeights[i][j].GetColsNb() << "\n";
+            for (size_t r = 0; r < vWeights[i][j].GetRowsNb(); ++r)
+            {
+                for (size_t c = 0; c < vWeights[i][j].GetColsNb(); ++c) { outFile << vWeights[i][j](r, c) << " "; }
                 outFile << "\n";
             }
         }
@@ -200,7 +203,7 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     ss_gen << generator;
     outFile << "generator " << ss_gen.str() << "\n";
 
-    int v_text = nnflags::NNVersion::V1; // Use different variable name to avoid conflict
+    int v_text = GetVersion();
     outFile << "version " << v_text << "\n";
 
     outFile.close();
@@ -211,6 +214,7 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
 {
     if (sName.empty()) throw std::runtime_error("Network name not defined nn::ANN_MLP:::Deserialize.");
     std::lock_guard<std::mutex> lock(mtx);
+    int version = -1;
 #if defined(USE_HDF5)
     h5::H5ppReader h5(fname);
     h5.read("NN/" + sName + "/nLayers", nLayers);
@@ -249,17 +253,16 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
     h5.read("NN/" + sName + "/generator", g);
     std::stringstream ss(g);
     ss >> generator;
+    h5.read("NN/" + sName + "/version", version);
 #else
     // Text-based deserialization
-    std::ifstream inFile(fname);
-    if (!inFile.is_open()) {
-        throw std::runtime_error("Could not open file for reading: " + fname);
-    }
+    std::ifstream inFile(fname, std::ios::binary);
+    if (!inFile.is_open()) { throw std::runtime_error("Could not open file for reading: " + fname); }
 
     std::string line, key;
-    int version = -1;
 
-    while (std::getline(inFile, line)) {
+    while (std::getline(inFile, line))
+    {
         std::stringstream ss_line(line); // Use ss_line for parsing each line
         ss_line >> key;
 
@@ -270,99 +273,129 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
         else if (key == "act") ss_line >> act;
         else if (key == "flags") ss_line >> flags;
         else if (key == "nLayers") ss_line >> nLayers;
-        else if (key == "vSize") {
+        else if (key == "vSize")
+        {
             vSize.clear();
             size_t val;
-            while (ss_line >> val) {
-                vSize.push_back(val);
-            }
-        } else if (key == "vBiases_start") {
+            while (ss_line >> val) { vSize.push_back(val); }
+        }
+        else if (key == "vBiases_start")
+        {
             vBiases.clear();
             vBiases.resize(nTop);
             size_t current_pop = 0, current_layer = 0;
             size_t rows = 0, cols = 0;
-            while (std::getline(inFile, line) && line != "vBiases_end") {
-                 std::stringstream ss_bias(line);
-                 std::string bias_key;
-                 ss_bias >> bias_key;
-                 if (bias_key == "pop") {
-                     ss_bias >> current_pop >> bias_key >> current_layer; // reads "layer" keyword
-                     if (vBiases[current_pop].empty()) {
-                         vBiases[current_pop].resize(nLayers - 1);
-                      }
-                  } else if (bias_key == "dims") {
-                      ss_bias >> rows >> cols;
-                      vBiases[current_pop][current_layer].Resize(rows, cols); // Use Resize
-                  } else { // Assume it's matrix data line
+            while (std::getline(inFile, line) && line != "vBiases_end")
+            {
+                std::stringstream ss_bias(line);
+                std::string bias_key;
+                ss_bias >> bias_key;
+                if (bias_key == "pop")
+                {
+                    ss_bias >> current_pop >> bias_key >> current_layer; // reads "layer" keyword
+                    if (vBiases[current_pop].empty()) { vBiases[current_pop].resize(nLayers - 1); }
+                }
+                else if (bias_key == "dims")
+                {
+                    ss_bias >> rows >> cols;
+                    vBiases[current_pop][current_layer].Resize(rows, cols); // Use Resize
+                }
+                else
+                {                                    // Assume it's matrix data line
                     std::stringstream ss_data(line); // Use the original line for data
-                    for (size_t r = 0; r < rows; ++r) {
-                         if (r > 0) { // Read subsequent lines for the same matrix
-                             if (!std::getline(inFile, line)) throw std::runtime_error("Unexpected EOF in bias matrix data");
-                             ss_data.clear();
-                             ss_data.str(line);
-                         }
-                         for (size_t c = 0; c < cols; ++c) {
-                             if (!(ss_data >> vBiases[current_pop][current_layer](r, c))) {
-                                 throw std::runtime_error("Error parsing bias matrix data");
-                             }
-                         }
-                     }
-                 }
+                    for (size_t r = 0; r < rows; ++r)
+                    {
+                        if (r > 0)
+                        { // Read subsequent lines for the same matrix
+                            if (!std::getline(inFile, line))
+                                throw std::runtime_error("Unexpected EOF in bias matrix data");
+                            ss_data.clear();
+                            ss_data.str(line);
+                        }
+                        for (size_t c = 0; c < cols; ++c)
+                        {
+                            if (!(ss_data >> vBiases[current_pop][current_layer](r, c)))
+                            {
+                                throw std::runtime_error("Error parsing bias matrix data");
+                            }
+                        }
+                    }
+                }
             }
-        } else if (key == "vWeights_start") {
+        }
+        else if (key == "vWeights_start")
+        {
             vWeights.clear();
             vWeights.resize(nTop);
             size_t current_pop = 0, current_layer = 0;
             size_t rows = 0, cols = 0;
-             while (std::getline(inFile, line) && line != "vWeights_end") {
-                 std::stringstream ss_weight(line);
-                 std::string weight_key;
-                 ss_weight >> weight_key;
-                 if (weight_key == "pop") {
-                     ss_weight >> current_pop >> weight_key >> current_layer; // reads "layer" keyword
-                     if (vWeights[current_pop].empty()) {
-                         vWeights[current_pop].resize(nLayers - 1);
-                      }
-                  } else if (weight_key == "dims") {
-                      ss_weight >> rows >> cols;
-                      vWeights[current_pop][current_layer].Resize(rows, cols); // Use Resize
-                  } else { // Assume it's matrix data line
+            while (std::getline(inFile, line) && line != "vWeights_end")
+            {
+                std::stringstream ss_weight(line);
+                std::string weight_key;
+                ss_weight >> weight_key;
+                if (weight_key == "pop")
+                {
+                    ss_weight >> current_pop >> weight_key >> current_layer; // reads "layer" keyword
+                    if (vWeights[current_pop].empty()) { vWeights[current_pop].resize(nLayers - 1); }
+                }
+                else if (weight_key == "dims")
+                {
+                    ss_weight >> rows >> cols;
+                    vWeights[current_pop][current_layer].Resize(rows, cols); // Use Resize
+                }
+                else
+                {                                    // Assume it's matrix data line
                     std::stringstream ss_data(line); // Use the original line for data
-                    for (size_t r = 0; r < rows; ++r) {
-                         if (r > 0) { // Read subsequent lines for the same matrix
-                             if (!std::getline(inFile, line)) throw std::runtime_error("Unexpected EOF in weight matrix data");
-                             ss_data.clear();
-                             ss_data.str(line);
-                         }
-                         for (size_t c = 0; c < cols; ++c) {
-                             if (!(ss_data >> vWeights[current_pop][current_layer](r, c))) {
-                                 throw std::runtime_error("Error parsing weight matrix data");
-                             }
-                         }
-                     }
-                 }
+                    for (size_t r = 0; r < rows; ++r)
+                    {
+                        if (r > 0)
+                        { // Read subsequent lines for the same matrix
+                            if (!std::getline(inFile, line))
+                                throw std::runtime_error("Unexpected EOF in weight matrix data");
+                            ss_data.clear();
+                            ss_data.str(line);
+                        }
+                        for (size_t c = 0; c < cols; ++c)
+                        {
+                            if (!(ss_data >> vWeights[current_pop][current_layer](r, c)))
+                            {
+                                throw std::runtime_error("Error parsing weight matrix data");
+                            }
+                        }
+                    }
+                }
             }
-        } else if (key == "generator") {
+        }
+        else if (key == "generator")
+        {
             std::string gen_state = line.substr(key.length() + 1); // +1 for space
             std::stringstream ss_gen(gen_state);
             ss_gen >> generator;
-        } else if (key == "version") {
-            ss_line >> version;
-            // Optional: Check version compatibility here if needed
         }
+        else if (key == "version") { ss_line >> version; }
     }
     inFile.close();
 
-    // Basic validation after loading
-    if (vSize.empty() || vBiases.empty() || vWeights.empty() || vBiases.size() != nTop || vWeights.size() != nTop) {
-         throw std::runtime_error("Deserialization failed: Incomplete or inconsistent data loaded.");
+    // Validation after loading
+    if (vSize.empty() || vBiases.empty() || vWeights.empty() || vBiases.size() != nTop || vWeights.size() != nTop)
+    {
+        throw std::runtime_error("Deserialization failed: Incomplete or inconsistent data loaded.");
     }
-     for(size_t i = 0; i < nTop; ++i) {
-        if (vBiases[i].size() != nLayers - 1 || vWeights[i].size() != nLayers - 1) {
-             throw std::runtime_error("Deserialization failed: Incorrect number of layers loaded for biases/weights.");
+    for (size_t i = 0; i < nTop; ++i)
+    {
+        if (vBiases[i].size() != nLayers - 1 || vWeights[i].size() != nLayers - 1)
+        {
+            throw std::runtime_error("Deserialization failed: Incorrect number of layers loaded for biases/weights.");
         }
     }
 #endif
+    int expectedVersion = GetVersion();
+    if (version != expectedVersion)
+    {
+        throw std::runtime_error("Incorrect Version: expected " + std::to_string(expectedVersion) + " found " +
+                                 std::to_string(version));
+    }
 }
 
 // Explicit template instantiation

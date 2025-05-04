@@ -3,8 +3,8 @@
 
 /************************/
 /*    ann_mlp_v1.h      */
-/*    Version 1.0       */
-/*     2023/02/26       */
+/*    Version 2.0       */
+/*     2025/05/04       */
 /************************/
 
 #include <mutex>
@@ -36,6 +36,8 @@ namespace nn
         inline size_t GetTopPerformersSize() const { return nTop; }
 
         inline size_t GetEpochs() const { return nEpochs; }
+
+        int GetVersion() const;
 
       protected:
         ANN_MLP();

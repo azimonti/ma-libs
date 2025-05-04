@@ -187,6 +187,7 @@ if(PYTHON_LIBNN)
 
     pybind11_add_module(${PROJECT_NAME} ${SRCS_PYTHON_LIB})
 
+    target_compile_definitions( ${PROJECT_NAME}       PRIVATE USE_BLAS USE_HDF5               )
     target_link_libraries( ${PROJECT_NAME} PRIVATE
         $<$<CONFIG:Debug>:cpp_nnd> # Link debug nn lib in Debug config
         $<$<NOT:$<CONFIG:Debug>>:cpp_nn> # Link release nn lib in other configs (Release, etc.)
