@@ -9,7 +9,9 @@
 #include "log/log.h"
 #include "math/algebra/matrix_operations.h"
 #include "ann_mlp_ga_v1.h"
+#if defined (USE_BLAS)
 #include "la_blas_mult.h"
+#endif
 
 namespace nnflags
 {

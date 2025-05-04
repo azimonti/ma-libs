@@ -9,23 +9,48 @@ include(COMPILERCPP)
 set(CMAKE_CXX_STANDARD 17)
 
 if(WIN32)
-    # On Windows, the pybind11 path is different
-    set(CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/Lib/site-packages/pybind11/share/cmake/pybind11")
-else()
-    # On macOS/Linux, use Python to detect the Python version and set the path
-    set(PYTHON_EXECUTABLE "python3")
-
-    # Get the Python version from the current virtual environment
-    execute_process(
-        COMMAND ${PYTHON_EXECUTABLE} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
-        OUTPUT_VARIABLE PYTHON_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    # Set the CMAKE_PREFIX_PATH using the detected Python version
-    set(CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/lib/python${PYTHON_VERSION}/site-packages/pybind11/share/cmake/pybind11")
+  set(EXPECTED_PYTHON_EXE "$ENV{VIRTUAL_ENV}/Scripts/python.exe")
+  # On Windows, the pybind11 path is different
+  list(APPEND CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/Lib/site-packages/pybind11/share/cmake/pybind11")
+elseif(APPLE OR UNIX) # Covers macOS and Linux/other Unix
+  set(EXPECTED_PYTHON_EXE "$ENV{VIRTUAL_ENV}/bin/python3") # Usually python3 in venvs
+  # Get the Python version from the current virtual environment
+  execute_process(
+    COMMAND ${EXPECTED_PYTHON_EXE} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+    OUTPUT_VARIABLE PYTHON_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+  # Set the CMAKE_PREFIX_PATH using the detected Python version
+  if(PYTHON_VERSION)
+    list(APPEND CMAKE_PREFIX_PATH "$ENV{VIRTUAL_ENV}/lib/python${PYTHON_VERSION}/site-packages/pybind11/share/cmake/pybind11")
+  else()
+    message(WARNING "Could not determine Python version for pybind11 path.")
+  endif()
 endif()
 
-set(PYBIND11_FINDPYTHON ON)
+if(DEFINED EXPECTED_PYTHON_EXE AND EXISTS "${EXPECTED_PYTHON_EXE}")
+  # Hint for find_package
+  set(Python_EXECUTABLE "${EXPECTED_PYTHON_EXE}" CACHE FILEPATH "Path to Python executable from venv")
+  message(STATUS "Hinting Python_EXECUTABLE to venv: ${Python_EXECUTABLE}")
+else()
+  message(STATUS "Virtual environment Python not found or OS not handled, letting CMake search.")
+endif()
+
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+
+message(STATUS "Using Python: ${Python_EXECUTABLE} version ${Python_VERSION}")
+find_package(pybind11 REQUIRED)
+
+# RPATH settings for macOS/Linux to find libs in the same build directory
+if(NOT WIN32)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  if(APPLE)
+    set(CMAKE_INSTALL_RPATH "@loader_path")
+  else() # Linux
+    set(CMAKE_INSTALL_RPATH "$ORIGIN")
+  endif()
+endif()
 find_package(pybind11 REQUIRED)
 
 set ( SRCS
@@ -41,7 +66,7 @@ set ( SRCS_PYTHON_LIB
     ./src/pybinding_test.cpp
     )
 
-    pybind11_add_module(pybind11_add ${SRCS_PYTHON_LIB} ${SRCS_LIB})
+pybind11_add_module(pybind11_add ${SRCS_PYTHON_LIB} ${SRCS_LIB})
 
 include_directories(../utils)
 

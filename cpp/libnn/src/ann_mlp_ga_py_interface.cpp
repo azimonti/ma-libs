@@ -10,8 +10,12 @@
 #include "ann_mlp_ga_v1.h"
 
 namespace py = pybind11;
-
+#if defined USE_BLAS
 PYBIND11_MODULE(cpp_nn_py, m)
+#else
+// simpler interface without BLAS nor HDF5 dependencies
+PYBIND11_MODULE(cpp_nn_py2, m)
+#endif
 {
     // Expose ANN_MLP_GA<float> to Python
     py::class_<nn::ANN_MLP_GA<float>>(m, "ANN_MLP_GA_float")

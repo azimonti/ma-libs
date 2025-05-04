@@ -12,7 +12,9 @@
 #include <assert.h>
 #include "math/algebra/matrix_operations.h"
 #include "ann_mlp_sgd_v1.h"
+#if defined (USE_BLAS)
 #include "la_blas_mult.h"
+#endif
 
 template <typename T> nn::ANN_MLP_SGD<T>::ANN_MLP_SGD() {}
 
