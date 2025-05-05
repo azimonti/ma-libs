@@ -2,7 +2,6 @@
 !/*   routines01.F90     */
 !/*    VERSION 1.0       */
 !/*     2022/09/07       */
-!/*  © MARCO AZIMONTI    */
 !/************************/
 
 MODULE TEST_ROUTINES

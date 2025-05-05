@@ -28,6 +28,10 @@ if(CPP_FORTRAN_BINDINGS)
   add_subdirectory( cpp/fortran_bindings/  )
 endif()
 
+if(CPP_TEST_SUITE OR CPP_TEST)
+  add_subdirectory( cpp/test/              )
+endif()
+
 # Fortran Libraries
 if(F_LIBHDF5UTILS OR BUILDSUITE)
   add_subdirectory( fortran/libhdf5utils/  )
@@ -45,6 +49,14 @@ if(F_LIBALGO OR BUILDSUITE)
   add_subdirectory( fortran/libalgo/       )
 endif()
 
+if(F_LIBMATH OR BUILDSUITE)
+  add_subdirectory( fortran/libmath/       )
+endif()
+
 if(F_LIBTEST OR BUILDSUITE)
   add_subdirectory( fortran/libtest/       )
+endif()
+
+if(F_TEST_SUITE OR F_TEST )
+  add_subdirectory( fortran/test/          )
 endif()

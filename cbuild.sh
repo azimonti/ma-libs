@@ -1,26 +1,27 @@
 #!/bin/bash
 
 displayusage() {
-    echo " =================================================================================== "
-    echo "|    Usage:                                                                         |"
-    echo "| cbuild.sh OPTS                                                                    |"
-    echo "|    available options [OPTS]:                                                      |"
-    echo "| -b) --build)            automatically updates the build when necessary            |"
-    echo "| -c) --clean)            removes build dirs                                        |"
-    echo "| -d) --dry-run)          creates the make file without building                    |"
-    echo "| -f) --force)            forces an update of the build                             |"
-    echo "| -h) --help)             print this help                                           |"
-    echo "| -m) --make)             performs make                                             |"
-	echo "| -n) --nproc)            sets the number of parallel processing (default nproc -1) |"
-    echo "| -o) --build-one)        build a single test. Equivalent to \"-w -DBUILDSINGLE=NAME\"|"
-    echo "| -r) --recompile)        continuously build when a file is saved                   |"
-    echo "| -s) --build-suite)      build test suite. Equivalent to \"-w -DBUILDSUITE=ON\"    |"
-    echo "| -t) --build-type)       specifies a different cmake build type (e.g. \"-t Debug\")  |"
+    echo " ====================================================================================== "
+    echo "|    Usage:                                                                            |"
+    echo "| cbuild.sh OPTS                                                                       |"
+    echo "|    available options [OPTS]:                                                         |"
+    echo "| -b) --build)            automatically updates the build when necessary               |"
+    echo "| -c) --clean)            removes build dirs                                           |"
+    echo "| -d) --dry-run)          creates the make file without building                       |"
+    echo "| -f) --force)            forces an update of the build                                |"
+    echo "| -h) --help)             print this help                                              |"
+    echo "| -m) --make)             performs make                                                |"
+	  echo "| -n) --nproc)            sets the number of parallel processing (default nproc -1)    |"
+    echo "| -o) --build-one-cpp)    build a single C++ test. Equivalent to \"-w -DCPP_TEST=NAME\"  |"
+    echo "| -p) --build-one-f)      build a single fortran test. Equivalent to \"-w -DTESTF=NAME\" |"
+    echo "| -r) --recompile)        continuously build when a file is saved                      |"
+    echo "| -s) --build-suite)      build test suite. Equivalent to \"-w -DBUILDSUITE=ON\"         |"
+    echo "| -t) --build-type)       specifies a different cmake build type (e.g. \"-t Debug\")     |"
     echo "| -u) --no-unity-build)   do not use unity build. Equivalent to \"-w -NOUNITYBUILD=ON\"  |"
-    echo "| -w) --cmake-params)     specifies cmake options in quoted (e.g. \"-DVAR=value\")    |"
-    echo "| -z) --analyze)          run scan-build                                            |"
-    echo "| [no arguments]          automatically updates the build when necessary            |"
-    echo " =================================================================================== "
+    echo "| -w) --cmake-params)     specifies cmake options in quoted (e.g. \"-DVAR=value\")       |"
+    echo "| -z) --analyze)          run scan-build                                               |"
+    echo "| [no arguments]          automatically updates the build when necessary               |"
+    echo " ====================================================================================== "
 }
 
 unameOut="$(uname -s)"
@@ -119,11 +120,12 @@ for arg in "$@"; do
 		"--help")            set -- "$@" "-h" ;;
 		"--make")            set -- "$@" "-m" ;;
 		"--nproc")           set -- "$@" "-n" ;;
-		"--build-one")       set -- "$@" "-o" ;;
+		"--build-one-cpp")   set -- "$@" "-o" ;;
+		"--build-one-f")     set -- "$@" "-p" ;;
 		"--recompile")       set -- "$@" "-r" ;;
 		"--build-suite")     set -- "$@" "-s" ;;
 		"--build-type")      set -- "$@" "-t" ;;
-        "--no-unity-build")  set -- "$@" "-u" ;;
+    "--no-unity-build")  set -- "$@" "-u" ;;
 		"--cmake-params")    set -- "$@" "-w" ;;
 		"--analyze")         set -- "$@" "-z" ;;
 		*)                   set -- "$@" "$arg";;
@@ -132,7 +134,7 @@ done
 
 # Parse short options
 OPTIND=1
-while getopts "bcdfhmn:o:rst:uw:z?" opt
+while getopts "bcdfhmn:o:p:rst:uw:z?" opt
 do
 	case "$opt" in
         "b") BUILD="TRUE";;
@@ -142,7 +144,8 @@ do
 		"h") displayusage; exit 0;;
         "m") EMAKE="TRUE";;
 		"n") NPROC="${OPTARG}";;
-		"o") CMAKEOPTS+=" -DBUILDSINGLE=${OPTARG} "; UPDATEMAKEFILES="TRUE";;
+		"o") CMAKEOPTS+=" -DCPP_TEST=${OPTARG} "; UPDATEMAKEFILES="TRUE";;
+		"p") CMAKEOPTS+=" -DF_TEST=${OPTARG} "; UPDATEMAKEFILES="TRUE";;
 		"r") CONTINUOUSCOMPILE="TRUE";;
 		"s") CMAKEOPTS+=" -DBUILDSUITE=ON "; UPDATEMAKEFILES="TRUE";;
 		"t") BUILDTYPE=${OPTARG}; UPDATEMAKEFILES="TRUE";;
