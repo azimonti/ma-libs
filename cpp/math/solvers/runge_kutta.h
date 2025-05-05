@@ -8,8 +8,8 @@
 /************************/
 
 #include <array>
-#include <cmath>
 #include <cassert>
+#include <cmath>
 
 #define S_C(x) static_cast<S>(x)
 #define T_C(x) static_cast<T>(x)
@@ -48,22 +48,25 @@ namespace ma
     // create a loop version of rk4singlestep called rk4loop
     template <typename T, typename S, typename U, size_t N>
     inline std::vector<std::array<S, N>>&
-    rk4loop(std::array<float, N>& (*fun)(T, const std::array<S, N>&, std::array<S, N>&, const U&),std::vector<T> t, std::vector<std::array<S, N>>& yout, const U& params)
+    rk4loop(std::array<float, N>& (*fun)(T, const std::array<S, N>&, std::array<S, N>&, const U&), std::vector<T> t,
+            std::vector<std::array<S, N>>& yout, const U& params)
     {
         assert(t.size() == yout.size());
         std::array<S, N> f1, f1t, f2, f2t, f3, f3t, f4;
         T dt;
-        for(size_t i=1; i<t.size(); i++)
+        for (size_t i = 1; i < t.size(); i++)
         {
-            dt = t[i] - t[i-1];
-            fun(t[i-1], yout[i-1], f1, params);
-            for (size_t j = 0; j < N; j++) { f1t[j] = yout[i-1][j] + S_C(dt / 2) * f1[j]; }
-            fun(t[i-1] + dt / 2, f1t, f2, params);
-            for (size_t j = 0; j < N; j++) { f2t[j] = yout[i-1][j] + S_C(dt / 2) * f2[j]; }
-            fun(t[i-1] + dt / 2, f2t, f3, params);
-            for (size_t j = 0; j < N; j++) { f3t[j] = yout[i-1][j] + S_C(dt) * f3[j]; }
-            fun(t[i-1] + dt, f3t, f4, params);
-            for (size_t j = 0; j < N; j++) { yout[i][j] = yout[i-1][j] + S_C(dt / 6) * (f1[j] + 2 * f2[j] + 2 * f3[j] + f4[j]);
+            dt = t[i] - t[i - 1];
+            fun(t[i - 1], yout[i - 1], f1, params);
+            for (size_t j = 0; j < N; j++) { f1t[j] = yout[i - 1][j] + S_C(dt / 2) * f1[j]; }
+            fun(t[i - 1] + dt / 2, f1t, f2, params);
+            for (size_t j = 0; j < N; j++) { f2t[j] = yout[i - 1][j] + S_C(dt / 2) * f2[j]; }
+            fun(t[i - 1] + dt / 2, f2t, f3, params);
+            for (size_t j = 0; j < N; j++) { f3t[j] = yout[i - 1][j] + S_C(dt) * f3[j]; }
+            fun(t[i - 1] + dt, f3t, f4, params);
+            for (size_t j = 0; j < N; j++)
+            {
+                yout[i][j] = yout[i - 1][j] + S_C(dt / 6) * (f1[j] + 2 * f2[j] + 2 * f3[j] + f4[j]);
             }
         }
         return yout;

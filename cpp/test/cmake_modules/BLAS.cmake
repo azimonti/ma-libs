@@ -1,0 +1,6 @@
+set(${TEST_PROJECT_NAME}INCS ../math ../utils)
+set(${TEST_PROJECT_NAME}SRCS ./src/blas_mult.test.cpp)
+set(${TEST_PROJECT_NAME}LINKLIBSDIRS ${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE})
+set(${TEST_PROJECT_NAME}LINKLIBS optimized cpp_alg_lapack debug cpp_alg_lapackd)
+add_definitions( -DCOUTEXT -DLOGGING -DUSE_BLAS )
+set(TEST_BIN blas.test)

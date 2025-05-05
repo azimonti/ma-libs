@@ -11,10 +11,10 @@
 #error "USE_LAPACK is not defined"
 #endif
 
-#include "la_blas_mult.h"
 #include "math/algebra/matrix.h"
 #include "math/algebra/matrix_operations.h"
 #include "math/algebra/tolerance.h"
+#include "la_blas_mult.h"
 
 namespace la
 {

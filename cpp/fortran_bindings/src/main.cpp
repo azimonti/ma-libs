@@ -6,7 +6,7 @@
 
 #define ST_C(x) static_cast<std::size_t>(x)
 #ifdef _MSC_VER
-#define add_ ADD
+#define add_  ADD
 #define exec_ EXEC
 #endif
 

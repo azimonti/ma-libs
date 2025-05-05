@@ -12,9 +12,9 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include "math/algebra/matrix.h"
+#include "math/algebra/matrix_operations.h"
 #include "la_decomposition.h"
-#include "matrix.h"
-#include "matrix_operations.h"
 
 namespace la
 {

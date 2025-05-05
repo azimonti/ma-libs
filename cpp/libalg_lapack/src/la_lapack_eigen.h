@@ -15,10 +15,10 @@
 #include <limits>
 #include <type_traits>
 #include <typeinfo>
-#include "la_blas_mult.h"
-#include "la_lapack_macro.h"
 #include "math/algebra/matrix.h"
 #include "math/algebra/matrix_operations.h"
+#include "la_blas_mult.h"
+#include "la_lapack_macro.h"
 
 namespace la
 {

@@ -8,10 +8,10 @@
 #include <complex>
 #include <type_traits>
 #include <typeinfo>
-#include "blas_interface.h"
-#include "la_blas_mult.h"
 #include "math/algebra/matrix.h"
 #include "math/algebra/matrix_operations.h"
+#include "blas_interface.h"
+#include "la_blas_mult.h"
 
 #define INT_C(x)            static_cast<int>(x)
 #define SIZE_T_C(x)         static_cast<size_t>(x)
