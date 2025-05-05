@@ -47,11 +47,24 @@ PYBIND11_MODULE(cpp_nn_py2, m)
         self.feedforward(pInputs, inputsSize, pOutputs, outputsSize, memberid, singleReturn);
     },
              py::arg("inputs"), py::arg("outputs"), py::arg("memberid"), py::arg("singleReturn"))
+
+        .def("feedforwardIndex",
+             [](nn::ANN_MLP_GA<float>& self, py::array_t<float> inputs, size_t memberid) -> size_t {
+        // directly get pointer to the underlying data
+        const float* pInputs = inputs.data();
+        // get size
+        size_t inputsSize    = static_cast<size_t>(inputs.size());
+        // call the C++ function overload that returns the index
+        return self.feedforward(pInputs, inputsSize, memberid);
+    }, py::arg("inputs"), py::arg("memberid"))
+
         .def("TrainGA", &nn::ANN_MLP_GA<float>::TrainGA)
         .def("TestGA", &nn::ANN_MLP_GA<float>::TestGA)
         .def("SetMixed", &nn::ANN_MLP_GA<float>::SetMixed)
         .def("GetMixed", &nn::ANN_MLP_GA<float>::GetMixed)
-        .def("CreatePopulation", &nn::ANN_MLP_GA<float>::CreatePopulation);
+        .def("CreatePopulation", &nn::ANN_MLP_GA<float>::CreatePopulation)
+        .def("GetNetworkSizeDim", &nn::ANN_MLP_GA<float>::GetNetworkSizeDim)
+        .def("GetNetworkSize", &nn::ANN_MLP_GA<float>::GetNetworkSize);
 
     // expose ANN_MLP_GA<double> to Python
     py::class_<nn::ANN_MLP_GA<double>>(m, "ANN_MLP_GA_double")
@@ -83,9 +96,22 @@ PYBIND11_MODULE(cpp_nn_py2, m)
         self.feedforward(pInputs, inputsSize, pOutputs, outputsSize, memberid, singleReturn);
     },
              py::arg("inputs"), py::arg("outputs"), py::arg("memberid"), py::arg("singleReturn"))
+
+        .def("feedforwardIndex",
+             [](nn::ANN_MLP_GA<double>& self, py::array_t<double> inputs, size_t memberid) -> size_t {
+        // directly get pointer to the underlying data
+        const double* pInputs = inputs.data();
+        // get size
+        size_t inputsSize     = static_cast<size_t>(inputs.size());
+        // call the C++ function overload that returns the index
+        return self.feedforward(pInputs, inputsSize, memberid);
+    }, py::arg("inputs"), py::arg("memberid"))
+
         .def("TrainGA", &nn::ANN_MLP_GA<double>::TrainGA)
         .def("TestGA", &nn::ANN_MLP_GA<double>::TestGA)
         .def("SetMixed", &nn::ANN_MLP_GA<double>::SetMixed)
         .def("GetMixed", &nn::ANN_MLP_GA<double>::GetMixed)
-        .def("CreatePopulation", &nn::ANN_MLP_GA<double>::CreatePopulation);
+        .def("CreatePopulation", &nn::ANN_MLP_GA<double>::CreatePopulation)
+        .def("GetNetworkSizeDim", &nn::ANN_MLP_GA<double>::GetNetworkSizeDim)
+        .def("GetNetworkSize", &nn::ANN_MLP_GA<double>::GetNetworkSize);
 }

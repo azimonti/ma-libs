@@ -39,6 +39,7 @@ namespace nn
         void feedforward(const T* pInputs, size_t inputsSize, T* pOutputs, size_t outputsSize, size_t memberid,
                          bool singleReturn);
         void feedforward(const std::vector<T>& vInputs, std::vector<T>& vOutputs, size_t memberid, bool singleReturn);
+        size_t feedforward(const T* pInputs, size_t inputsSize, size_t memberid);
         void TrainGA(const std::vector<std::vector<T>>& data, const std::vector<std::vector<T>>& reference,
                      size_t nGenerations, size_t BatchSize, bool shuffleTrainingData = true);
         int TestGA(const std::vector<std::vector<T>>& data, const std::vector<std::vector<T>>& reference);

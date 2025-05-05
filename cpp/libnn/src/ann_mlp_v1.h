@@ -39,6 +39,10 @@ namespace nn
 
         int GetVersion() const;
 
+        inline std::vector<size_t> GetNetworkSize() const { return vSize; }
+
+        inline size_t GetNetworkSizeDim() const { return vSize.size(); }
+
       protected:
         ANN_MLP();
         ANN_MLP(std::vector<size_t> size, int seed, size_t populationSize = 1, size_t topPerformersSize = 1,

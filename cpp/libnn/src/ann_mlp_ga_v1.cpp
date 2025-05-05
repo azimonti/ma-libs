@@ -78,6 +78,36 @@ void nn::ANN_MLP_GA<T>::feedforward(const std::vector<T>& vInputs, std::vector<T
     feedforward(vInputs.data(), vInputs.size(), vOutputs.data(), vOutputs.size(), memberid, singleReturn);
 }
 
+template <typename T> size_t nn::ANN_MLP_GA<T>::feedforward(const T* pInputs, size_t inputsSize, size_t memberid)
+{
+    void (*pAct)(T*, size_t) = nullptr;
+    switch (act)
+    {
+    case SIGMOID: pAct = &sigmoid<T>; break;
+    case TANH: pAct = &tanh<T>; break;
+    default: throw std::invalid_argument("Unknown activation function");
+    }
+
+    // set the input layer
+    std::vector<la::Matrix<T>> na_;
+    for (size_t i = 0; i < nLayers; ++i) { na_.push_back(la::Matrix<T>(vSize[i])); }
+    na_[0].assign(pInputs, inputsSize);
+
+    // feedforward the network
+    for (size_t l = 1; l < nLayers; ++l)
+    {
+        la::MatMultVec(na_[l], vWeightsPop[memberid][l - 1], na_[l - 1]);
+        na_[l] += vBiasesPop[memberid][l - 1];
+        nn::ActFunc(na_[l], pAct);
+    }
+
+    const std::vector<T>& res_                           = na_[nLayers - 1].data();
+
+    const typename std::vector<T>::const_iterator maxPos = std::max_element(res_.begin(), res_.end());
+
+    return static_cast<size_t>(std::distance(res_.begin(), maxPos));
+}
+
 template <typename T>
 void nn::ANN_MLP_GA<T>::TrainGA(const std::vector<std::vector<T>>& data, const std::vector<std::vector<T>>& reference,
                                 size_t nGenerations, size_t BatchSize, bool shuffleTrainingData)
