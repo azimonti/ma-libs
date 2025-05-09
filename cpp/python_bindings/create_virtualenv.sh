@@ -2,8 +2,8 @@
 
 unameOut="$(uname -s)"
 case "${unameOut}" in
-	Linux*)		MACHINE="$(lsb_release -is)";;
-	Darwin*)	MACHINE=mac;;
+  Linux*)   MACHINE=linux;;
+	Darwin*)	MACHINE=macos;;
 	CYGWIN*)	MACHINE=cygwin;;
 	MINGW*)		MACHINE=mingw;;
 	*)		MACHINE="UNKNOWN:${unameOut}"
@@ -19,29 +19,15 @@ else
 	PYTHON=$(which python3)
 fi
 
-# Define directories with full paths
-BASHSCRIPTDIR=$(cd "$(dirname "$0")" || exit; pwd)
-BUILDDIR=$(realpath "${BASHSCRIPTDIR}/../../build")
-VENVDIR=$(realpath "${BUILDDIR}/python_env")
+MYVENV="venv"
+"${PYTHON}" -u -m venv "${MYVENV}"
+# Activate the new environment
+echo "Activating the virtual environment..."
+source "${MYVENV}/${SCRIPTDIR}/activate"
 
-# Check if the virtual environment already exists
-if [ -d "${VENVDIR}" ]; then
-    echo "Virtual environment already exists at ${VENVDIR}. Activating it..."
-else
-    # Create build directory if it doesn't exist
-    mkdir -p "${BUILDDIR}"
+# Install dependencies
+echo "Installing requirements..."
+pip install -r requirements.txt
 
-    # Create a virtual environment
-    "${PYTHON}" -u -m venv "${VENVDIR}"
-
-    # Activate the virtual environment and install pybind11
-    echo "Creating virtual environment at ${VENVDIR} and installing pybind11..."
-    # shellcheck source=/dev/null
-    source "${VENVDIR}/${SCRIPTDIR}/activate"
-    pip install --upgrade pip
-    pip install pybind11
-fi
-
-# Print the activation message
-echo "You can activate the environment with 'source ${VENVDIR}/${SCRIPTDIR}/activate' and then build."
-
+echo "Virtual environment '$MYVENV' created and activated."
+echo "Requirements installed."
