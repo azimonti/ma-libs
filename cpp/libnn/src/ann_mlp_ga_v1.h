@@ -3,14 +3,16 @@
 
 /************************/
 /*    ann_mlp_ga_v1.h   */
-/*    Version 1.1       */
-/*     2023/05/04       */
+/*    Version 1.2       */
+/*     2023/05/10       */
 /************************/
 
 #include "ann_mlp_v1.h"
 
 namespace nn
 {
+    enum class PopulationStrategy : int { MIXED, FIXED, MIXED_WITH_RANDOM_INJECTION, FIXED_WITH_RANDOM_INJECTION };
+
     template <typename T> class ANN_MLP_GA : public ANN_MLP<T>
     {
         using ANN_MLP<T>::GetRandomNormal;
@@ -44,10 +46,8 @@ namespace nn
                      size_t nGenerations, size_t BatchSize, bool shuffleTrainingData = true);
         int TestGA(const std::vector<std::vector<T>>& data, const std::vector<std::vector<T>>& reference);
 
-        void SetMixed(bool b);
-        bool GetMixed();
-
         void CreatePopulation(bool bKeepPrevious = true);
+        void SetPopulationStrategy(PopulationStrategy strategy, double injection_ratio = 0.15);
 
         void Serialize(const std::string& fname);
         void Deserialize(const std::string& fname);
@@ -56,9 +56,15 @@ namespace nn
         void AllocatePopulation();
         void CreatePopulationFixed(bool bKeepPrevious);
         void CreatePopulationMixed(bool bKeepPrevious);
+        void CreatePopulationMixedWithRandomInjection(bool bKeepPrevious);
+        void CreatePopulationFixedWithRandomInjection(bool bKeepPrevious);
+
         std::vector<std::vector<la::Matrix<T>>> vBiasesPop{};
         std::vector<std::vector<la::Matrix<T>>> vWeightsPop{};
         std::vector<std::vector<la::Matrix<T>>> vNaPop{};
+
+        PopulationStrategy population_strategy_ = PopulationStrategy::MIXED;
+        double random_injection_ratio_          = 0.15;
     };
 
 } // namespace nn

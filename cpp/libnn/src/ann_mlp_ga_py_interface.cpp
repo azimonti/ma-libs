@@ -63,11 +63,12 @@ template <typename T> void bind_ann_mlp_ga_class(py::module& m, const std::strin
 
         .def("TrainGA", &Class::TrainGA)
         .def("TestGA", &Class::TestGA)
-        .def("SetMixed", &Class::SetMixed, py::arg("mixed"))
-        .def("GetMixed", &Class::GetMixed)
         .def("CreatePopulation", &Class::CreatePopulation)
         .def("GetNetworkSizeDim", &Class::GetNetworkSizeDim)
-        .def("GetNetworkSize", &Class::GetNetworkSize);
+        .def("GetNetworkSize", &Class::GetNetworkSize)
+        .def("SetPopulationStrategy", &Class::SetPopulationStrategy, py::arg("strategy"),
+             py::arg("injection_ratio") = 0.15,
+             "Sets the population creation strategy and the random injection ratio.");
 }
 
 #if defined USE_BLAS
@@ -78,6 +79,13 @@ PYBIND11_MODULE(cpp_nn_py2, m)
 #endif
 {
     m.doc() = "pybind11 plugin for ANN_MLP_GA";
+
+    py::enum_<nn::PopulationStrategy>(m, "PopulationStrategy")
+        .value("MIXED", nn::PopulationStrategy::MIXED)
+        .value("FIXED", nn::PopulationStrategy::FIXED)
+        .value("MIXED_WITH_RANDOM_INJECTION", nn::PopulationStrategy::MIXED_WITH_RANDOM_INJECTION)
+        .value("FIXED_WITH_RANDOM_INJECTION", nn::PopulationStrategy::FIXED_WITH_RANDOM_INJECTION)
+        .export_values();
 
     // Bind the float version
     bind_ann_mlp_ga_class<float>(m, "float");

@@ -1,7 +1,7 @@
 /************************/
 /*   ann_mlp_ga_v1.cpp  */
-/*    Version 1.1       */
-/*     2023/05/04       */
+/*    Version 1.2       */
+/*     2023/05/10       */
 /************************/
 
 #include <algorithm>
@@ -25,9 +25,9 @@ template <typename T> nn::ANN_MLP_GA<T>::ANN_MLP_GA() {}
 template <typename T>
 nn::ANN_MLP_GA<T>::ANN_MLP_GA(std::vector<size_t> size, int seed, size_t populationSize, size_t topPerformersSize,
                               size_t activationFunction, bool bGenerateMixed)
-    : ANN_MLP<T>(size, seed, populationSize, topPerformersSize, activationFunction)
+    : ANN_MLP<T>(size, seed, populationSize, topPerformersSize, activationFunction), random_injection_ratio_(0.15)
 {
-    flags = bGenerateMixed ? flags | nnflags::NNFlags::MIXED_POPULATION : flags & ~nnflags::NNFlags::MIXED_POPULATION;
+    population_strategy_ = bGenerateMixed ? PopulationStrategy::MIXED : PopulationStrategy::FIXED;
     AllocatePopulation();
 }
 
@@ -251,10 +251,38 @@ template <typename T> void nn::ANN_MLP_GA<T>::AllocatePopulation()
     }
 }
 
+template <typename T> void nn::ANN_MLP_GA<T>::SetPopulationStrategy(PopulationStrategy strategy, double injection_ratio)
+{
+    population_strategy_ = strategy;
+    if (injection_ratio >= 0.0 && injection_ratio <= 1.0) { random_injection_ratio_ = injection_ratio; }
+    else
+    {
+        // LOG_WARN("ANN_MLP_GA: Invalid random_injection_ratio provided: %f. Using current value: %f", injection_ratio,
+        // random_injection_ratio_);
+        std::cerr << "Warning: ANN_MLP_GA: Invalid random_injection_ratio provided: " << injection_ratio
+                  << ". Using current value: " << random_injection_ratio_ << std::endl;
+    }
+}
+
 template <typename T> void nn::ANN_MLP_GA<T>::CreatePopulation(bool bKeepPrevious)
 {
-    if (flags & nnflags::NNFlags::MIXED_POPULATION) CreatePopulationMixed(bKeepPrevious);
-    else CreatePopulationFixed(bKeepPrevious);
+    // Dispatch to the appropriate creation method based on strategy
+    switch (population_strategy_)
+    {
+    case PopulationStrategy::MIXED: CreatePopulationMixed(bKeepPrevious); break;
+    case PopulationStrategy::FIXED: CreatePopulationFixed(bKeepPrevious); break;
+    case PopulationStrategy::MIXED_WITH_RANDOM_INJECTION:
+        CreatePopulationMixedWithRandomInjection(bKeepPrevious);
+        break;
+    case PopulationStrategy::FIXED_WITH_RANDOM_INJECTION:
+        CreatePopulationFixedWithRandomInjection(bKeepPrevious);
+        break;
+    default: // Fallback to MIXED
+        // LOG_WARN("ANN_MLP_GA: Unknown population strategy. Defaulting to MIXED.");
+        std::cerr << "Warning: ANN_MLP_GA: Unknown population strategy. Defaulting to MIXED." << std::endl;
+        CreatePopulationMixed(bKeepPrevious);
+        break;
+    }
 }
 
 template <typename T> void nn::ANN_MLP_GA<T>::Serialize(const std::string& fname)
@@ -391,15 +419,173 @@ template <typename T> void nn::ANN_MLP_GA<T>::UpdateWeightsAndBiases(const std::
     }
 }
 
-template <typename T> void nn::ANN_MLP_GA<T>::SetMixed(bool bMixed)
+template <typename T> void nn::ANN_MLP_GA<T>::CreatePopulationMixedWithRandomInjection(bool bKeepPrevious)
 {
-    if (bMixed) flags |= nnflags::NNFlags::MIXED_POPULATION;
-    else flags &= ~nnflags::NNFlags::MIXED_POPULATION;
+    std::lock_guard<std::mutex> lock(mtx);
+    size_t current_pop_idx = 0;
+
+    // 1. Elitism: Keep top performers if bKeepPrevious is true
+    if (bKeepPrevious)
+    {
+        for (size_t i = 0; i < nTop && current_pop_idx < nPopSize; ++i)
+        {
+            for (size_t k = 0; k < nLayers - 1; ++k)
+            {
+                vBiasesPop[current_pop_idx][k].assign(vBiases[i][k].data());
+                vWeightsPop[current_pop_idx][k].assign(vWeights[i][k].data());
+            }
+            current_pop_idx++;
+        }
+    }
+
+    // 2. Introduce a percentage of purely random individuals
+    size_t num_to_fill_after_elitism = nPopSize - current_pop_idx;
+    size_t num_random_individuals =
+        static_cast<size_t>(static_cast<double>(num_to_fill_after_elitism) * random_injection_ratio_);
+
+    for (size_t i = 0; i < num_random_individuals && current_pop_idx < nPopSize; ++i)
+    {
+        for (size_t j = 0; j < nLayers - 1; ++j)
+        {
+            const size_t nRows = vSize[j + 1];
+            const size_t nCols = vSize[j];
+            for (size_t r = 0; r < nRows; ++r)
+            {
+                vBiasesPop[current_pop_idx][j][r][0] = GetRandomNormal(); // Pure random
+                for (size_t c = 0; c < nCols; ++c)
+                {
+                    vWeightsPop[current_pop_idx][j][r][c] = GetRandomNormal(); // Pure random
+                }
+            }
+        }
+        current_pop_idx++;
+    }
+
+    // 3. Fill the rest with the mixed strategy (crossover + mutation from top performers)
+    for (size_t i = current_pop_idx; i < nPopSize; ++i)
+    {
+        size_t parent_a_idx = static_cast<size_t>(GetRandomUniformInt() % static_cast<int>(nTop));
+        size_t parent_b_idx = static_cast<size_t>(GetRandomUniformInt() % static_cast<int>(nTop));
+        if (nTop > 1)
+        { // Ensure different parents if possible
+            while (parent_a_idx == parent_b_idx)
+                parent_b_idx = static_cast<size_t>(GetRandomUniformInt() % static_cast<int>(nTop));
+        }
+
+        for (size_t j = 0; j < nLayers - 1; ++j)
+        {
+            const size_t chosen_parent_idx = (GetRandomUniformReal() < 0.5 || nTop == 1) ? parent_a_idx : parent_b_idx;
+
+            vBiasesPop[i][j].assign(vBiases[chosen_parent_idx][j].data());
+            vBiasesPop[i][j] *= static_cast<T>(0.9); // Scale down
+            vWeightsPop[i][j].assign(vWeights[chosen_parent_idx][j].data());
+            vWeightsPop[i][j] *= static_cast<T>(0.9); // Scale down
+
+            const size_t nRows = vSize[j + 1];
+            const size_t nCols = vSize[j];
+            for (size_t r = 0; r < nRows; ++r)
+            {
+                vBiasesPop[i][j][r][0] += static_cast<T>(0.1) * GetRandomNormal(); // Mutate
+                for (size_t c = 0; c < nCols; ++c)
+                {
+                    vWeightsPop[i][j][r][c] += static_cast<T>(0.1) * GetRandomNormal(); // Mutate
+                }
+            }
+        }
+    }
 }
 
-template <typename T> bool nn::ANN_MLP_GA<T>::GetMixed()
+template <typename T> void nn::ANN_MLP_GA<T>::CreatePopulationFixedWithRandomInjection(bool bKeepPrevious)
 {
-    return flags & nnflags::NNFlags::MIXED_POPULATION;
+    std::lock_guard<std::mutex> lock(mtx);
+    size_t current_pop_idx = 0;
+
+    // 1. Elitism: Keep top performers
+    if (bKeepPrevious)
+    {
+        for (size_t i = 0; i < nTop && current_pop_idx < nPopSize; ++i)
+        {
+            for (size_t k = 0; k < nLayers - 1; ++k)
+            {
+                vBiasesPop[current_pop_idx][k].assign(vBiases[i][k].data());
+                vWeightsPop[current_pop_idx][k].assign(vWeights[i][k].data());
+            }
+            current_pop_idx++;
+        }
+    }
+
+    // 2. Crossover part from CreatePopulationFixed
+    for (size_t i = 0; i < nTop && current_pop_idx < nPopSize; ++i)
+    {
+        for (size_t j = i + 1; j < nTop && current_pop_idx < nPopSize; ++j)
+        {
+            for (size_t k = 0; k < nLayers - 1; ++k)
+            {
+                vBiasesPop[current_pop_idx][k].Zeros();
+                vBiasesPop[current_pop_idx][k] += vBiases[i][k];
+                vBiasesPop[current_pop_idx][k] += vBiases[j][k];
+                vBiasesPop[current_pop_idx][k] *= static_cast<T>(0.5);
+                vWeightsPop[current_pop_idx][k].Zeros();
+                vWeightsPop[current_pop_idx][k] += vWeights[i][k];
+                vWeightsPop[current_pop_idx][k] += vWeights[j][k];
+                vWeightsPop[current_pop_idx][k] *= static_cast<T>(0.5);
+            }
+            current_pop_idx++;
+        }
+    }
+
+    // 3. Introduce a percentage of purely random individuals
+    size_t num_to_fill_after_elitism_crossover = nPopSize - current_pop_idx;
+    size_t num_random_individuals =
+        static_cast<size_t>(static_cast<double>(num_to_fill_after_elitism_crossover) * random_injection_ratio_);
+    // Adjust if random_injection_ratio_ is high, ensure it doesn't try to fill more than available slots
+    num_random_individuals = std::min(num_random_individuals, num_to_fill_after_elitism_crossover);
+
+    for (size_t i = 0; i < num_random_individuals && current_pop_idx < nPopSize; ++i)
+    {
+        for (size_t j = 0; j < nLayers - 1; ++j)
+        {
+            const size_t nRows = vSize[j + 1];
+            const size_t nCols = vSize[j];
+            for (size_t r = 0; r < nRows; ++r)
+            {
+                vBiasesPop[current_pop_idx][j][r][0] = GetRandomNormal(); // Pure random
+                for (size_t c = 0; c < nCols; ++c)
+                {
+                    vWeightsPop[current_pop_idx][j][r][c] = GetRandomNormal(); // Pure random
+                }
+            }
+        }
+        current_pop_idx++;
+    }
+
+    // 4. Fill remaining with mutation part from CreatePopulationFixed
+    size_t top_performer_idx_for_mutation = 0;
+    while (current_pop_idx < nPopSize)
+    {
+        for (size_t j = 0; j < nLayers - 1; ++j)
+        {
+            vBiasesPop[current_pop_idx][j].Zeros();
+            vBiasesPop[current_pop_idx][j] += vBiases[top_performer_idx_for_mutation][j];
+            vBiasesPop[current_pop_idx][j] *= static_cast<T>(0.9); // Scale down
+            vWeightsPop[current_pop_idx][j].Zeros();
+            vWeightsPop[current_pop_idx][j] += vWeights[top_performer_idx_for_mutation][j];
+            vWeightsPop[current_pop_idx][j] *= static_cast<T>(0.9); // Scale down
+
+            const size_t nRows = vSize[j + 1];
+            const size_t nCols = vSize[j];
+            for (size_t r = 0; r < nRows; ++r)
+            {
+                vBiasesPop[current_pop_idx][j][r][0] += static_cast<T>(0.1) * GetRandomNormal(); // Mutate
+                for (size_t c = 0; c < nCols; ++c)
+                {
+                    vWeightsPop[current_pop_idx][j][r][c] += static_cast<T>(0.1) * GetRandomNormal(); // Mutate
+                }
+            }
+        }
+        top_performer_idx_for_mutation = (top_performer_idx_for_mutation + 1) % nTop;
+        current_pop_idx++;
+    }
 }
 
 // Explicit template instantiation
