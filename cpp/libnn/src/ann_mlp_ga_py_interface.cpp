@@ -1,7 +1,7 @@
 /*******************************/
 /* ann_mlp_ga_py_interface.cpp */
-/*         Version 1.0         */
-/*          2024/09/20         */
+/*         Version 2.0         */
+/*          2025/05/10         */
 /*******************************/
 
 #include <pybind11/numpy.h>
@@ -10,6 +10,66 @@
 #include "ann_mlp_ga_v1.h"
 
 namespace py = pybind11;
+
+// Helper function to bind the templated class
+template <typename T> void bind_ann_mlp_ga_class(py::module& m, const std::string& class_name_suffix)
+{
+    using Class            = nn::ANN_MLP_GA<T>; // Alias for the specific instantiation
+    std::string class_name = "ANN_MLP_GA_" + class_name_suffix;
+
+    py::class_<Class>(m, class_name.c_str())
+        .def(py::init<>())
+        .def(py::init<std::vector<size_t>, int, size_t, size_t, size_t, bool>(), py::arg("layers_size"),
+             py::arg("activation_fcn_type"), py::arg("pop_size"), py::arg("top_performers_size"), py::arg("epochs"),
+             py::arg("mixed_precision") = false)
+
+        .def("PrintNetworkInfo", &Class::PrintNetworkInfo)
+        .def("PrintBiases", &Class::PrintBiases)
+        .def("PrintWeights", &Class::PrintWeights)
+        .def("SetName", &Class::SetName, py::arg("name"))
+        .def("SetEpochs", &Class::SetEpochs, py::arg("epochs"))
+        .def("UpdateEpochs", &Class::UpdateEpochs, py::arg("epochs"))
+        .def("Serialize", &Class::Serialize, py::arg("filename"))
+        .def("Deserialize", &Class::Deserialize, py::arg("filename"))
+        .def("GetPopSize", &Class::GetPopSize)
+        .def("GetTopPerformersSize", &Class::GetTopPerformersSize)
+        .def("GetEpochs", &Class::GetEpochs)
+        .def("UpdateWeightsAndBiases", &Class::UpdateWeightsAndBiases)
+        .def("feedforward",
+             [](Class& self, py::array_t<T> inputs, py::array_t<T> outputs, size_t memberid, bool singleReturn) {
+        py::buffer_info inputs_buf  = inputs.request();
+        py::buffer_info outputs_buf = outputs.request();
+
+        if (inputs_buf.ndim != 1) { throw std::runtime_error("Input array must be 1-dimensional."); }
+        if (outputs_buf.ndim != 1) { throw std::runtime_error("Output array must be 1-dimensional."); }
+
+        const T* pInputs   = static_cast<const T*>(inputs_buf.ptr);
+        T* pOutputs        = static_cast<T*>(outputs_buf.ptr);
+        size_t inputsSize  = static_cast<size_t>(inputs_buf.shape[0]);
+        size_t outputsSize = static_cast<size_t>(outputs_buf.shape[0]);
+
+        self.feedforward(pInputs, inputsSize, pOutputs, outputsSize, memberid, singleReturn);
+    }, py::arg("inputs"), py::arg("outputs"), py::arg("memberid"), py::arg("singleReturn"))
+
+        .def("feedforwardIndex",
+             [](Class& self, py::array_t<T> inputs, size_t memberid) -> size_t {
+        py::buffer_info inputs_buf = inputs.request();
+        if (inputs_buf.ndim != 1) { throw std::runtime_error("Input array must be 1-dimensional."); }
+
+        const T* pInputs  = static_cast<const T*>(inputs_buf.ptr);
+        size_t inputsSize = static_cast<size_t>(inputs_buf.shape[0]);
+        return self.feedforward(pInputs, inputsSize, memberid);
+    }, py::arg("inputs"), py::arg("memberid"))
+
+        .def("TrainGA", &Class::TrainGA)
+        .def("TestGA", &Class::TestGA)
+        .def("SetMixed", &Class::SetMixed, py::arg("mixed"))
+        .def("GetMixed", &Class::GetMixed)
+        .def("CreatePopulation", &Class::CreatePopulation)
+        .def("GetNetworkSizeDim", &Class::GetNetworkSizeDim)
+        .def("GetNetworkSize", &Class::GetNetworkSize);
+}
+
 #if defined USE_BLAS
 PYBIND11_MODULE(cpp_nn_py, m)
 #else
@@ -17,101 +77,11 @@ PYBIND11_MODULE(cpp_nn_py, m)
 PYBIND11_MODULE(cpp_nn_py2, m)
 #endif
 {
-    // Expose ANN_MLP_GA<float> to Python
-    py::class_<nn::ANN_MLP_GA<float>>(m, "ANN_MLP_GA_float")
-        .def(py::init<>())
-        .def(py::init<std::vector<size_t>, int, size_t, size_t, size_t, bool>())
+    m.doc() = "pybind11 plugin for ANN_MLP_GA";
 
-        .def("PrintNetworkInfo", &nn::ANN_MLP_GA<float>::PrintNetworkInfo)
-        .def("PrintBiases", &nn::ANN_MLP_GA<float>::PrintBiases)
-        .def("PrintWeights", &nn::ANN_MLP_GA<float>::PrintWeights)
-        .def("SetName", &nn::ANN_MLP_GA<float>::SetName)
-        .def("SetEpochs", &nn::ANN_MLP_GA<float>::SetEpochs)
-        .def("UpdateEpochs", &nn::ANN_MLP_GA<float>::UpdateEpochs)
-        .def("Serialize", &nn::ANN_MLP_GA<float>::Serialize)
-        .def("Deserialize", &nn::ANN_MLP_GA<float>::Deserialize)
-        .def("GetPopSize", &nn::ANN_MLP_GA<float>::GetPopSize)
-        .def("GetTopPerformersSize", &nn::ANN_MLP_GA<float>::GetTopPerformersSize)
-        .def("GetEpochs", &nn::ANN_MLP_GA<float>::GetEpochs)
-        .def("UpdateWeightsAndBiases", &nn::ANN_MLP_GA<float>::UpdateWeightsAndBiases)
-        .def("feedforward",
-             [](nn::ANN_MLP_GA<float>& self, py::array_t<float> inputs, py::array_t<float> outputs, size_t memberid,
-                bool singleReturn) {
-        // directly get pointers to the underlying data
-        const float* pInputs = inputs.data();
-        float* pOutputs      = outputs.mutable_data();
-        // get sizes
-        size_t inputsSize    = static_cast<size_t>(inputs.size());
-        size_t outputsSize   = static_cast<size_t>(outputs.size());
-        // call the C++ function with raw pointers
-        self.feedforward(pInputs, inputsSize, pOutputs, outputsSize, memberid, singleReturn);
-    },
-             py::arg("inputs"), py::arg("outputs"), py::arg("memberid"), py::arg("singleReturn"))
+    // Bind the float version
+    bind_ann_mlp_ga_class<float>(m, "float");
 
-        .def("feedforwardIndex",
-             [](nn::ANN_MLP_GA<float>& self, py::array_t<float> inputs, size_t memberid) -> size_t {
-        // directly get pointer to the underlying data
-        const float* pInputs = inputs.data();
-        // get size
-        size_t inputsSize    = static_cast<size_t>(inputs.size());
-        // call the C++ function overload that returns the index
-        return self.feedforward(pInputs, inputsSize, memberid);
-    }, py::arg("inputs"), py::arg("memberid"))
-
-        .def("TrainGA", &nn::ANN_MLP_GA<float>::TrainGA)
-        .def("TestGA", &nn::ANN_MLP_GA<float>::TestGA)
-        .def("SetMixed", &nn::ANN_MLP_GA<float>::SetMixed)
-        .def("GetMixed", &nn::ANN_MLP_GA<float>::GetMixed)
-        .def("CreatePopulation", &nn::ANN_MLP_GA<float>::CreatePopulation)
-        .def("GetNetworkSizeDim", &nn::ANN_MLP_GA<float>::GetNetworkSizeDim)
-        .def("GetNetworkSize", &nn::ANN_MLP_GA<float>::GetNetworkSize);
-
-    // expose ANN_MLP_GA<double> to Python
-    py::class_<nn::ANN_MLP_GA<double>>(m, "ANN_MLP_GA_double")
-        .def(py::init<>())
-        .def(py::init<std::vector<size_t>, int, size_t, size_t, size_t, bool>())
-
-        .def("PrintNetworkInfo", &nn::ANN_MLP_GA<double>::PrintNetworkInfo)
-        .def("PrintBiases", &nn::ANN_MLP_GA<double>::PrintBiases)
-        .def("PrintWeights", &nn::ANN_MLP_GA<double>::PrintWeights)
-        .def("SetName", &nn::ANN_MLP_GA<double>::SetName)
-        .def("SetEpochs", &nn::ANN_MLP_GA<double>::SetEpochs)
-        .def("UpdateEpochs", &nn::ANN_MLP_GA<double>::UpdateEpochs)
-        .def("Serialize", &nn::ANN_MLP_GA<double>::Serialize)
-        .def("Deserialize", &nn::ANN_MLP_GA<double>::Deserialize)
-        .def("GetPopSize", &nn::ANN_MLP_GA<double>::GetPopSize)
-        .def("GetTopPerformersSize", &nn::ANN_MLP_GA<double>::GetTopPerformersSize)
-        .def("GetEpochs", &nn::ANN_MLP_GA<double>::GetEpochs)
-        .def("UpdateWeightsAndBiases", &nn::ANN_MLP_GA<double>::UpdateWeightsAndBiases)
-        .def("feedforward",
-             [](nn::ANN_MLP_GA<double>& self, py::array_t<double> inputs, py::array_t<double> outputs, size_t memberid,
-                bool singleReturn) {
-        // directly get pointers to the underlying data
-        const double* pInputs = inputs.data();
-        double* pOutputs      = outputs.mutable_data();
-        // get sizes
-        size_t inputsSize     = static_cast<size_t>(inputs.size());
-        size_t outputsSize    = static_cast<size_t>(outputs.size());
-        // call the C++ function with raw pointers
-        self.feedforward(pInputs, inputsSize, pOutputs, outputsSize, memberid, singleReturn);
-    },
-             py::arg("inputs"), py::arg("outputs"), py::arg("memberid"), py::arg("singleReturn"))
-
-        .def("feedforwardIndex",
-             [](nn::ANN_MLP_GA<double>& self, py::array_t<double> inputs, size_t memberid) -> size_t {
-        // directly get pointer to the underlying data
-        const double* pInputs = inputs.data();
-        // get size
-        size_t inputsSize     = static_cast<size_t>(inputs.size());
-        // call the C++ function overload that returns the index
-        return self.feedforward(pInputs, inputsSize, memberid);
-    }, py::arg("inputs"), py::arg("memberid"))
-
-        .def("TrainGA", &nn::ANN_MLP_GA<double>::TrainGA)
-        .def("TestGA", &nn::ANN_MLP_GA<double>::TestGA)
-        .def("SetMixed", &nn::ANN_MLP_GA<double>::SetMixed)
-        .def("GetMixed", &nn::ANN_MLP_GA<double>::GetMixed)
-        .def("CreatePopulation", &nn::ANN_MLP_GA<double>::CreatePopulation)
-        .def("GetNetworkSizeDim", &nn::ANN_MLP_GA<double>::GetNetworkSizeDim)
-        .def("GetNetworkSize", &nn::ANN_MLP_GA<double>::GetNetworkSize);
+    // Bind the double version
+    bind_ann_mlp_ga_class<double>(m, "double");
 }

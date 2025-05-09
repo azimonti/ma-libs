@@ -16,6 +16,10 @@ Since the installation is not easy (in particular on Windows it requires both in
 
 - OpenGL multiplatform graphic engine, useful to visualize, useful fo data interpretation and presentation of numerical results in 2D and 3D (built with `--cmake-params "-DCPP_LIBGRAPHIC_ENGINE=ON"` or `--build-suite`).
 
+- C++ configuration loader (built with `--cmake-params "-DCPP_LIBCONFIG_LOADER=ON"` or `--build-suite`). A detailed README is available [here](cpp/libconfig_loader/README.md).
+
+- C++ doctest test routines (built with `--cmake-params "-DCPP_TEST_SUITE=ON"` or `--cmake-params "-DCPP_TEST=CPPTESTNAME"`).
+
 ## Fortran
 
 - HDF5 bindings library to hide the system call to HDF5 and write directly the requested type (build with `-DF_LIBHDF5UTILS=ON` or `--build-suite`).
@@ -27,6 +31,8 @@ Since the installation is not easy (in particular on Windows it requires both in
 - Algorithms routines (build with `-DF_LIBALGO=ON` or `--build-suite`).
 
 - Testing library which produce output similar to doctest (build with `-DF_LIBTEST=ON` or `--build-suite`).
+
+- Fortran doctest test routines (built with `--cmake-params "-DF_TEST_SUITE=ON"` or `--cmake-params "-DF_TEST=CPPTESTNAME"`).
 
 ## Required Tools
 

@@ -63,14 +63,11 @@ if(PYTHON_LIBNN)
   if(DEFINED EXPECTED_PYTHON_EXE AND EXISTS "${EXPECTED_PYTHON_EXE}")
     # Hint for find_package
     set(Python_EXECUTABLE "${EXPECTED_PYTHON_EXE}" CACHE FILEPATH "Path to Python executable from venv")
-    message(STATUS "Hinting Python_EXECUTABLE to venv: ${Python_EXECUTABLE}")
   else()
     message(STATUS "Virtual environment Python not found or OS not handled, letting CMake search.")
   endif()
 
   find_package(Python COMPONENTS Interpreter Development REQUIRED)
-
-  message(STATUS "Using Python: ${Python_EXECUTABLE} version ${Python_VERSION}")
   find_package(pybind11 REQUIRED)
 
   # RPATH settings for macOS/Linux to find libs in the same build directory

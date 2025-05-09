@@ -1,0 +1,45 @@
+# Test data for config_loader.cpp
+
+# Existing data
+TestData.StringVector = alpha, beta, gamma
+Test.MalformedVectorInt = 10,twenty,30,40.5
+Test.MalformedVectorDouble = 10.1,thirty-point-three,30.3
+Test.EmptyVector =
+Test.VectorWithEmptyParts = val1,,val2
+
+# New data for basic successful retrieval
+Test.String = Hello World
+Test.Int = 123
+Test.Double = 45.67
+Test.BoolTrue = true
+Test.BoolFalse = false
+Test.BoolOne = 1
+Test.BoolZero = 0
+Test.BoolCapsTrue = TRUE
+Test.BoolCapsFalse = FALSE
+
+# New data for whitespace handling
+Test.StringWithSpaces =   leading and trailing spaces   
+Test.IntWithSpaces =   234   
+Test.DoubleWithSpaces =   56.78   
+
+# New data for negative numbers
+Test.NegativeInt = -100
+Test.NegativeDouble = -99.88
+
+# New data for different delimiter
+Test.VectorWithSemicolon = one;two;three
+
+# New data for empty value (note: for numeric/bool, these should use defaults and potentially log errors)
+Test.EmptyStringValue = 
+Test.EmptyIntValue = 
+Test.EmptyDoubleValue =
+Test.EmptyBoolValue = 
+
+# New data for invalid boolean
+Test.InvalidBool = not_a_bool
+
+# Comments and empty lines test
+# This is a comment
+
+# Above was an empty line

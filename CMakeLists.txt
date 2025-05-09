@@ -16,6 +16,10 @@ if(CPP_LIBNN OR BUILDSUITE)
   add_subdirectory( cpp/libnn/             )
 endif()
 
+if(CPP_LIBCONFIG_LOADER OR BUILDSUITE)
+  add_subdirectory( cpp/libconfig_loader/  )
+endif()
+
 if(CPP_LIBGRAPHIC_ENGINE OR BUILDSUITE)
   add_subdirectory( cpp/libgraphic_engine/ )
 endif()
