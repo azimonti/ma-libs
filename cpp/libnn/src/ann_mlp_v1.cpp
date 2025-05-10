@@ -4,6 +4,7 @@
 /*     2025/05/10       */
 /************************/
 
+#include <algorithm> // For std::find
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
@@ -17,7 +18,7 @@
 
 namespace nnflags
 {
-    enum NNVersion : int { V1 = 0, V2 = 1 }; // Incremented version
+    enum NNVersion : int { V1 = 0, V2 = 1 };
 }
 
 template <typename T>
@@ -45,6 +46,17 @@ nn::ANN_MLP<T>::ANN_MLP(std::vector<size_t> size, int seed, size_t populationSiz
 template <typename T> int nn::ANN_MLP<T>::GetVersion() const
 {
     return nnflags::NNVersion::V2;
+}
+
+template <typename T> std::vector<int> nn::ANN_MLP<T>::GetSupportedVersions() const
+{
+    return {nnflags::NNVersion::V2}; // Currently supports only V2
+}
+
+template <typename T> bool nn::ANN_MLP<T>::isSupportedVersion(int version) const
+{
+    const auto supported_versions = GetSupportedVersions();
+    return std::find(supported_versions.begin(), supported_versions.end(), version) != supported_versions.end();
 }
 
 template <typename T> void nn::ANN_MLP<T>::AllocateWeightsBiases()
@@ -124,6 +136,8 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     std::lock_guard<std::mutex> lock(mtx);
 #if defined(USE_HDF5)
     h5::H5ppWriter h5(fname);
+    int v_ = GetVersion();
+    h5.write("NN/" + sName + "/version", v_);
     h5.write("NN/" + sName + "/vSize", vSize);
     for (size_t i = 0; i < nTop; ++i)
     {
@@ -149,14 +163,14 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     std::stringstream ss;
     ss << generator;
     h5.write("NN/" + sName + "/generator", ss.str());
-    int v_ = GetVersion();
-    h5.write("NN/" + sName + "/version", v_);
 #else
     // Text-based serialization
     std::ofstream outFile(fname, std::ios::binary);
     if (!outFile.is_open()) { throw std::runtime_error("Could not open file for writing: " + fname); }
 
+    int v_text = GetVersion();
     outFile << "sName " << sName << "\n";
+    outFile << "version " << v_text << "\n";
     outFile << "nEpochs " << nEpochs << "\n";
     outFile << "nPopSize " << nPopSize << "\n";
     outFile << "nTop " << nTop << "\n";
@@ -205,9 +219,6 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     ss_gen << generator;
     outFile << "generator " << ss_gen.str() << "\n";
 
-    int v_text = GetVersion();
-    outFile << "version " << v_text << "\n";
-
     outFile.close();
 #endif
 }
@@ -219,6 +230,10 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
     int version = -1;
 #if defined(USE_HDF5)
     h5::H5ppReader h5(fname);
+    h5.read("NN/" + sName + "/version", version);
+
+    if (!isSupportedVersion(version)) { throw std::runtime_error("Unsupported version: " + std::to_string(version)); }
+
     h5.read("NN/" + sName + "/nLayers", nLayers);
     h5.read("NN/" + sName + "/nEpochs", nEpochs);
     h5.read("NN/" + sName + "/nPopSize", nPopSize);
@@ -258,7 +273,6 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
     h5.read("NN/" + sName + "/generator", g);
     std::stringstream ss(g);
     ss >> generator;
-    h5.read("NN/" + sName + "/version", version);
 #else
     // Text-based deserialization
     std::ifstream inFile(fname, std::ios::binary);
@@ -272,6 +286,15 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
         ss_line >> key;
 
         if (key == "sName") ss_line >> sName;
+        else if (key == "version")
+        {
+            ss_line >> version;
+            if (!isSupportedVersion(version))
+            {
+                inFile.close();
+                throw std::runtime_error("Unsupported version: " + std::to_string(version));
+            }
+        }
         else if (key == "nEpochs") ss_line >> nEpochs;
         else if (key == "nPopSize") ss_line >> nPopSize;
         else if (key == "nTop") ss_line >> nTop;
@@ -384,7 +407,6 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
             std::stringstream ss_gen(gen_state);
             ss_gen >> generator;
         }
-        else if (key == "version") { ss_line >> version; }
     }
     inFile.close();
 
@@ -401,12 +423,6 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
         }
     }
 #endif
-    int expectedVersion = GetVersion();
-    if (version != expectedVersion)
-    {
-        throw std::runtime_error("Incorrect Version: expected " + std::to_string(expectedVersion) + " found " +
-                                 std::to_string(version));
-    }
 }
 
 // Explicit template instantiation

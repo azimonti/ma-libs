@@ -40,6 +40,8 @@ namespace nn
         inline size_t GetEpochs() const { return nEpochs; }
 
         int GetVersion() const;
+        std::vector<int> GetSupportedVersions() const;
+        bool isSupportedVersion(int version) const;
 
         inline std::vector<size_t> GetNetworkSize() const { return vSize; }
 

@@ -24,9 +24,6 @@ set ( SRCS_DEPS_LOG
 
 add_library( obj${PROJECT_NAME} OBJECT ${SRCS}                                            )
 set_property( TARGET obj${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE 1              )
-if(UNITYBUILD)
-  set_property( TARGET obj${PROJECT_NAME} PROPERTY UNITY_BUILD ON                         )
-endif()
 add_library( ${PROJECT_NAME}static STATIC $<TARGET_OBJECTS:obj${PROJECT_NAME}>            )
 
 set_target_properties( obj${PROJECT_NAME}      PROPERTIES DEBUG_POSTFIX "d"               )
@@ -85,6 +82,10 @@ if(PYTHON_LIBNN)
   )
 
   pybind11_add_module(${PROJECT_NAME} ${SRCS_PYTHON_LIB})
+
+  if(UNITYBUILD)
+    set_property( TARGET ${PROJECT_NAME}     PROPERTY UNITY_BUILD ON                     )
+  endif()
 
   target_link_libraries( ${PROJECT_NAME} PRIVATE cpp_nn2static)
 endif()
