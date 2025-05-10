@@ -17,19 +17,28 @@ namespace Config
     // This will populate an internal map.
     bool loadConfiguration(const std::string& filepath);
 
-    // Generic getter functions
-    // They will return std::optional to indicate if the key was found and valid
-    // Alternatively, they can take a default value and return it if key not found/invalid.
-    // For simplicity with the current structure, let's use default values and log errors.
-
-    std::string getString(const std::string& key, const std::string& defaultValue = "");
-    int getInt(const std::string& key, int defaultValue = 0);
-    double getDouble(const std::string& key, double defaultValue = 0.0);
-    bool getBool(const std::string& key, bool defaultValue = false);
+    std::string getString(const std::string& key);
+    std::string getString(const std::string& key, const std::string& defaultValue);
+    int getInt(const std::string& key);
+    int getInt(const std::string& key, int defaultValue);
+    double getDouble(const std::string& key);
+    double getDouble(const std::string& key, double defaultValue);
+    float getFloat(const std::string& key);
+    float getFloat(const std::string& key, float defaultValue);
+    bool getBool(const std::string& key);
+    bool getBool(const std::string& key, bool defaultValue);
 
     std::vector<std::string> getVectorString(const std::string& key, char delimiter = ',');
+    std::vector<std::string> getVectorString(const std::string& key, const std::vector<std::string>& defaultValue,
+                                             char delimiter = ',');
     std::vector<int> getVectorInt(const std::string& key, char delimiter = ',');
+    std::vector<int> getVectorInt(const std::string& key, const std::vector<int>& defaultValue, char delimiter = ',');
     std::vector<double> getVectorDouble(const std::string& key, char delimiter = ',');
+    std::vector<double> getVectorDouble(const std::string& key, const std::vector<double>& defaultValue,
+                                        char delimiter = ',');
+    std::vector<float> getVectorFloat(const std::string& key, char delimiter = ',');
+    std::vector<float> getVectorFloat(const std::string& key, const std::vector<float>& defaultValue,
+                                      char delimiter = ',');
 
     // Helper to check if a key exists
     bool hasKey(const std::string& key);

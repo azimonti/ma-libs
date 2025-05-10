@@ -53,12 +53,6 @@ TEST_CASE_FIXTURE(ConfigFixture, "[config_loader] Vector Value Retrieval from Fo
         std::vector<std::string> actual_empty_vector = Config::getVectorString("Test.EmptyVector");
         CHECK(actual_empty_vector.empty() == true);
     }
-
-    SUBCASE("GetVectorString - NonExistent Key")
-    {
-        std::vector<std::string> empty_vec_str;
-        CHECK(Config::getVectorString("NonExistent.KeyStringVec") == empty_vec_str);
-    }
 }
 
 TEST_CASE_FIXTURE(ConfigFixture, "[config_loader] Malformed Vector Retrieval from Focused Config")
@@ -66,20 +60,159 @@ TEST_CASE_FIXTURE(ConfigFixture, "[config_loader] Malformed Vector Retrieval fro
     SUBCASE("MalformedVectorInt - Test.MalformedVectorInt")
     {
         // Test.MalformedVectorInt = 10,twenty,30,40.5
-        // "twenty" and "40.5" should be skipped, errors logged.
-        std::vector<int> expected_malformed_int = {10, 30};
-        CHECK(Config::getVectorInt("Test.MalformedVectorInt") == expected_malformed_int);
+        // "twenty" or "40.5" should cause a throw.
+        CHECK_THROWS_AS(Config::getVectorInt("Test.MalformedVectorInt"), std::runtime_error);
+    }
+}
+
+TEST_CASE_FIXTURE(ConfigFixture, "[config_loader] Throwing Behavior Tests")
+{
+    SUBCASE("GetString - Successful Retrieval")
+    {
+        CHECK(Config::getString("Test.String") == "Hello World");
+    }
+    SUBCASE("GetString - NonExistent Key Throws")
+    {
+        CHECK_THROWS_AS(Config::getString("NonExistent.StringKey.Throw"), std::runtime_error);
     }
 
-    SUBCASE("MalformedVectorDouble - Test.MalformedVectorDouble")
+    SUBCASE("GetInt - Successful Retrieval")
+    {
+        CHECK(Config::getInt("Test.Int") == 123);
+    }
+    SUBCASE("GetInt - NonExistent Key Throws")
+    {
+        CHECK_THROWS_AS(Config::getInt("NonExistent.IntKey.Throw"), std::runtime_error);
+    }
+    SUBCASE("GetInt - Malformed Value Throws")
+    {
+        // Test.MalformedIntForThrow = 123xyz
+        CHECK_THROWS_AS(Config::getInt("Test.MalformedIntForThrow"), std::runtime_error);
+    }
+    SUBCASE("GetInt - Value with Extra Chars Throws")
+    {
+        // Test.IntWithExtraForThrow = 789 jkl
+        CHECK_THROWS_AS(Config::getInt("Test.IntWithExtraForThrow"), std::runtime_error);
+    }
+
+    SUBCASE("GetDouble - Successful Retrieval")
+    {
+        CHECK(Config::getDouble("Test.Double") == doctest::Approx(45.67));
+    }
+    SUBCASE("GetDouble - NonExistent Key Throws")
+    {
+        CHECK_THROWS_AS(Config::getDouble("NonExistent.DoubleKey.Throw"), std::runtime_error);
+    }
+    SUBCASE("GetDouble - Malformed Value Throws")
+    {
+        // Test.MalformedDouble = not_a_double
+        CHECK_THROWS_AS(Config::getDouble("Test.MalformedDouble"), std::runtime_error);
+    }
+    SUBCASE("GetDouble - Value with Extra Chars Throws")
+    {
+        // Test.DoubleWithExtra = 7.89 jkl
+        CHECK_THROWS_AS(Config::getDouble("Test.DoubleWithExtra"), std::runtime_error);
+    }
+
+    SUBCASE("GetFloat - Successful Retrieval")
+    {
+        // Test.Float = 1.23
+        CHECK(Config::getFloat("Test.Float") == doctest::Approx(1.23f));
+    }
+    SUBCASE("GetFloat - NonExistent Key Throws")
+    {
+        CHECK_THROWS_AS(Config::getFloat("NonExistent.FloatKey.Throw"), std::runtime_error);
+    }
+    SUBCASE("GetFloat - Malformed Value Throws")
+    {
+        // Test.MalformedFloat = abc
+        CHECK_THROWS_AS(Config::getFloat("Test.MalformedFloat"), std::runtime_error);
+    }
+    SUBCASE("GetFloat - Value with Extra Chars Throws")
+    {
+        // Test.FloatWithExtra = 4.56 ghi
+        CHECK_THROWS_AS(Config::getFloat("Test.FloatWithExtra"), std::runtime_error);
+    }
+
+    SUBCASE("GetBool - Successful Retrieval - True")
+    {
+        CHECK(Config::getBool("Test.BoolTrue") == true);
+    }
+    SUBCASE("GetBool - Successful Retrieval - False")
+    {
+        CHECK(Config::getBool("Test.BoolFalse") == false);
+    }
+    SUBCASE("GetBool - NonExistent Key Throws")
+    {
+        CHECK_THROWS_AS(Config::getBool("NonExistent.BoolKey.Throw"), std::runtime_error);
+    }
+    SUBCASE("GetBool - Malformed Value Throws")
+    {
+        // Test.MalformedBoolForThrow = maybe
+        CHECK_THROWS_AS(Config::getBool("Test.MalformedBoolForThrow"), std::runtime_error);
+    }
+
+    SUBCASE("GetVectorString - Successful Retrieval")
+    {
+        std::vector<std::string> expected_str_vec = {"alpha", "beta", "gamma"};
+        CHECK(Config::getVectorString("TestData.StringVector") == expected_str_vec);
+    }
+    SUBCASE("GetVectorString - NonExistent Key Throws")
+    {
+        CHECK_THROWS_AS(Config::getVectorString("NonExistent.KeyStringVec.Throw"), std::runtime_error);
+    }
+
+    SUBCASE("GetVectorInt - Successful Retrieval")
+    {
+        // Test.GoodVectorInt = 1,2,3,4
+        std::vector<int> expected_vec = {1, 2, 3, 4};
+        std::vector<int> actual_vec   = Config::getVectorInt("Test.GoodVectorInt");
+        CHECK(actual_vec == expected_vec);
+    }
+    SUBCASE("GetVectorInt - NonExistent Key Throws")
+    {
+        CHECK_THROWS_AS(Config::getVectorInt("NonExistent.VectorIntKey.Throw"), std::runtime_error);
+    }
+    SUBCASE("GetVectorInt - Malformed Element Throws") // This is covered by the updated MalformedVectorInt test case
+    {
+        // Test.MalformedVectorInt = 10,twenty,30,40.5
+        CHECK_THROWS_AS(Config::getVectorInt("Test.MalformedVectorInt"), std::runtime_error);
+    }
+
+    SUBCASE("GetVectorDouble - Successful Retrieval")
+    {
+        // Test.GoodVectorDouble = 10.1,20.2,30.3
+        std::vector<double> expected_vec = {10.1, 20.2, 30.3};
+        std::vector<double> actual_vec   = Config::getVectorDouble("Test.GoodVectorDouble");
+        REQUIRE(actual_vec.size() == expected_vec.size());
+        for (size_t i = 0; i < actual_vec.size(); ++i) { CHECK(actual_vec[i] == doctest::Approx(expected_vec[i])); }
+    }
+    SUBCASE("GetVectorDouble - NonExistent Key Throws")
+    {
+        CHECK_THROWS_AS(Config::getVectorDouble("NonExistent.VectorDoubleKey.Throw"), std::runtime_error);
+    }
+    SUBCASE("GetVectorDouble - Malformed Element Throws")
     {
         // Test.MalformedVectorDouble = 10.1,thirty-point-three,30.3
-        // "thirty-point-three" should be skipped, errors logged.
-        std::vector<double> expected_malformed_double = {10.1, 30.3};
-        std::vector<double> actual_malformed_double   = Config::getVectorDouble("Test.MalformedVectorDouble");
-        REQUIRE(actual_malformed_double.size() == 2);
-        CHECK(actual_malformed_double[0] == doctest::Approx(10.1));
-        CHECK(actual_malformed_double[1] == doctest::Approx(30.3));
+        CHECK_THROWS_AS(Config::getVectorDouble("Test.MalformedVectorDouble"), std::runtime_error);
+    }
+
+    SUBCASE("GetVectorFloat - Successful Retrieval")
+    {
+        // Test.VectorFloat = 1.1,2.2,3.3
+        std::vector<float> expected_vec = {1.1f, 2.2f, 3.3f};
+        std::vector<float> actual_vec   = Config::getVectorFloat("Test.VectorFloat");
+        REQUIRE(actual_vec.size() == expected_vec.size());
+        for (size_t i = 0; i < actual_vec.size(); ++i) { CHECK(actual_vec[i] == doctest::Approx(expected_vec[i])); }
+    }
+    SUBCASE("GetVectorFloat - NonExistent Key Throws")
+    {
+        CHECK_THROWS_AS(Config::getVectorFloat("NonExistent.VectorFloatKey.Throw"), std::runtime_error);
+    }
+    SUBCASE("GetVectorFloat - Malformed Element Throws")
+    {
+        // Test.MalformedVectorFloat = 1.1,xyz,3.3
+        CHECK_THROWS_AS(Config::getVectorFloat("Test.MalformedVectorFloat"), std::runtime_error);
     }
 }
 
@@ -104,6 +237,60 @@ TEST_CASE_FIXTURE(ConfigFixture, "[config_loader] Basic Value Retrieval - Defaul
     {
         CHECK(Config::getBool("NonExistent.BoolKeyTrue", true) == true);
         CHECK(Config::getBool("NonExistent.BoolKeyFalse", false) == false);
+    }
+}
+
+TEST_CASE_FIXTURE(ConfigFixture, "[config_loader] Vector Value Retrieval - Default Values")
+{
+    SUBCASE("GetVectorString - Default for NonExistent Key")
+    {
+        std::vector<std::string> default_val = {"default", "vector"};
+        CHECK(Config::getVectorString("NonExistent.VectorStringKey", default_val) == default_val);
+    }
+    // For GetVectorString, malformed elements are not really a concept as all parts are strings.
+
+    SUBCASE("GetVectorInt - Default for NonExistent Key")
+    {
+        std::vector<int> default_val = {11, 22};
+        CHECK(Config::getVectorInt("NonExistent.VectorIntKey", default_val) == default_val);
+    }
+    SUBCASE("GetVectorInt - Default for Malformed Key")
+    {
+        // Test.MalformedVectorInt = 10,twenty,30,40.5
+        std::vector<int> default_val = {99, 88};
+        CHECK(Config::getVectorInt("Test.MalformedVectorInt", default_val) == default_val);
+    }
+
+    SUBCASE("GetVectorDouble - Default for NonExistent Key")
+    {
+        std::vector<double> default_val = {1.11, 2.22};
+        std::vector<double> result      = Config::getVectorDouble("NonExistent.VectorDoubleKey", default_val);
+        REQUIRE(result.size() == default_val.size());
+        for (size_t i = 0; i < result.size(); ++i) CHECK(result[i] == doctest::Approx(default_val[i]));
+    }
+    SUBCASE("GetVectorDouble - Default for Malformed Key")
+    {
+        // Test.MalformedVectorDouble = 10.1,thirty-point-three,30.3
+        std::vector<double> default_val = {9.99, 8.88};
+        std::vector<double> result      = Config::getVectorDouble("Test.MalformedVectorDouble", default_val);
+        REQUIRE(result.size() == default_val.size());
+        for (size_t i = 0; i < result.size(); ++i) CHECK(result[i] == doctest::Approx(default_val[i]));
+    }
+
+    SUBCASE("GetVectorFloat - Default for NonExistent Key")
+    {
+        std::vector<float> default_val = {1.1f, 2.2f};
+        std::vector<float> result      = Config::getVectorFloat("NonExistent.VectorFloatKey", default_val);
+        REQUIRE(result.size() == default_val.size());
+        for (size_t i = 0; i < result.size(); ++i) CHECK(result[i] == doctest::Approx(default_val[i]));
+    }
+    SUBCASE("GetVectorFloat - Default for Malformed Key")
+    {
+        // Test.MalformedVectorFloat = 1.1,xyz,3.3
+        std::vector<float> default_val = {9.9f, 8.8f};
+        std::vector<float> result      = Config::getVectorFloat("Test.MalformedVectorFloat", default_val);
+        REQUIRE(result.size() == default_val.size());
+        for (size_t i = 0; i < result.size(); ++i) CHECK(result[i] == doctest::Approx(default_val[i]));
     }
 }
 
