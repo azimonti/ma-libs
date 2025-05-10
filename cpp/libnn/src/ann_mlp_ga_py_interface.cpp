@@ -19,9 +19,8 @@ template <typename T> void bind_ann_mlp_ga_class(py::module& m, const std::strin
 
     py::class_<Class>(m, class_name.c_str())
         .def(py::init<>())
-        .def(py::init<std::vector<size_t>, int, size_t, size_t, size_t, bool>(), py::arg("layers_size"),
-             py::arg("activation_fcn_type"), py::arg("pop_size"), py::arg("top_performers_size"), py::arg("epochs"),
-             py::arg("mixed_precision") = false)
+        .def(py::init<std::vector<size_t>, int, size_t, size_t, size_t>(), py::arg("layers_size"),
+             py::arg("activation_fcn_type"), py::arg("pop_size"), py::arg("top_performers_size"), py::arg("epochs"))
 
         .def("PrintNetworkInfo", &Class::PrintNetworkInfo)
         .def("PrintBiases", &Class::PrintBiases)
@@ -67,8 +66,9 @@ template <typename T> void bind_ann_mlp_ga_class(py::module& m, const std::strin
         .def("GetNetworkSizeDim", &Class::GetNetworkSizeDim)
         .def("GetNetworkSize", &Class::GetNetworkSize)
         .def("SetPopulationStrategy", &Class::SetPopulationStrategy, py::arg("strategy"),
-             py::arg("injection_ratio") = 0.15,
-             "Sets the population creation strategy and the random injection ratio.");
+             py::arg("injection_ratio") = 0.15, "Sets the population creation strategy and the random injection ratio.")
+        .def("GetPopulationStrategy", &Class::GetPopulationStrategy, "Gets the current population strategy.")
+        .def("GetRandomInjectionRatio", &Class::GetRandomInjectionRatio, "Gets the current random injection ratio.");
 }
 
 #if defined USE_BLAS

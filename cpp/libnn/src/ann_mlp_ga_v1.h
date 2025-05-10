@@ -11,8 +11,6 @@
 
 namespace nn
 {
-    enum class PopulationStrategy : int { MIXED, FIXED, MIXED_WITH_RANDOM_INJECTION, FIXED_WITH_RANDOM_INJECTION };
-
     template <typename T> class ANN_MLP_GA : public ANN_MLP<T>
     {
         using ANN_MLP<T>::GetRandomNormal;
@@ -28,13 +26,14 @@ namespace nn
         using ANN_MLP<T>::nPopSize;
         using ANN_MLP<T>::nTop;
         using ANN_MLP<T>::act;
-        using ANN_MLP<T>::flags;
         using ANN_MLP<T>::mtx;
+        using ANN_MLP<T>::population_strategy_;
+        using ANN_MLP<T>::random_injection_ratio_;
 
       public:
         ANN_MLP_GA();
         ANN_MLP_GA(std::vector<size_t> size, int seed = 4041, size_t populationSize = 130,
-                   size_t topPerformersSize = 10, size_t activationFunction = SIGMOID, bool bGenerateMixed = false);
+                   size_t topPerformersSize = 10, size_t activationFunction = SIGMOID);
 
         void UpdateWeightsAndBiases(const std::vector<size_t>& v_);
 
@@ -62,9 +61,6 @@ namespace nn
         std::vector<std::vector<la::Matrix<T>>> vBiasesPop{};
         std::vector<std::vector<la::Matrix<T>>> vWeightsPop{};
         std::vector<std::vector<la::Matrix<T>>> vNaPop{};
-
-        PopulationStrategy population_strategy_ = PopulationStrategy::MIXED;
-        double random_injection_ratio_          = 0.15;
     };
 
 } // namespace nn

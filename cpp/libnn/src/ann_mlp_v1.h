@@ -3,8 +3,8 @@
 
 /************************/
 /*    ann_mlp_v1.h      */
-/*    Version 2.0       */
-/*     2025/05/04       */
+/*    Version 2.1       */
+/*     2025/05/10       */
 /************************/
 
 #include <mutex>
@@ -15,6 +15,8 @@
 
 namespace nn
 {
+    enum class PopulationStrategy : int { MIXED, FIXED, MIXED_WITH_RANDOM_INJECTION, FIXED_WITH_RANDOM_INJECTION };
+
     template <typename T> class ANN_MLP
     {
       public:
@@ -43,6 +45,10 @@ namespace nn
 
         inline size_t GetNetworkSizeDim() const { return vSize.size(); }
 
+        inline PopulationStrategy GetPopulationStrategy() const { return population_strategy_; }
+
+        inline double GetRandomInjectionRatio() const { return random_injection_ratio_; }
+
       protected:
         ANN_MLP();
         ANN_MLP(std::vector<size_t> size, int seed, size_t populationSize = 1, size_t topPerformersSize = 1,
@@ -63,7 +69,8 @@ namespace nn
         size_t nPopSize;
         size_t nTop;
         size_t act;
-        int flags;
+        PopulationStrategy population_strategy_;
+        double random_injection_ratio_;
         std::mutex mtx;
 
       private:

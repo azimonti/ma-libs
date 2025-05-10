@@ -24,10 +24,9 @@ template <typename T> nn::ANN_MLP_GA<T>::ANN_MLP_GA() {}
 
 template <typename T>
 nn::ANN_MLP_GA<T>::ANN_MLP_GA(std::vector<size_t> size, int seed, size_t populationSize, size_t topPerformersSize,
-                              size_t activationFunction, bool bGenerateMixed)
-    : ANN_MLP<T>(size, seed, populationSize, topPerformersSize, activationFunction), random_injection_ratio_(0.15)
+                              size_t activationFunction)
+    : ANN_MLP<T>(size, seed, populationSize, topPerformersSize, activationFunction)
 {
-    population_strategy_ = bGenerateMixed ? PopulationStrategy::MIXED : PopulationStrategy::FIXED;
     AllocatePopulation();
 }
 

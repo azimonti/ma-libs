@@ -3,8 +3,8 @@
 
 /************************/
 /*  ann_mlp_sgd_v1.h    */
-/*    Version 2.0       */
-/*     2023/04/12       */
+/*    Version 2.1       */
+/*     2025/05/10       */
 /************************/
 
 #include <iterator>
@@ -23,7 +23,6 @@ namespace nn
         using ANN_MLP<T>::nPopSize;
         using ANN_MLP<T>::nTop;
         using ANN_MLP<T>::act;
-        using ANN_MLP<T>::flags;
         using ANN_MLP<T>::mtx;
 
       public:

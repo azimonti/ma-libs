@@ -1,7 +1,7 @@
 /************************/
 /*    ann_mlp_v1.cpp    */
-/*    Version 2.0       */
-/*     2025/05/04       */
+/*    Version 2.1       */
+/*     2025/05/10       */
 /************************/
 
 #include <cassert>
@@ -17,13 +17,13 @@
 
 namespace nnflags
 {
-    enum NNVersion : int { V1 = 0 };
+    enum NNVersion : int { V1 = 0, V2 = 1 }; // Incremented version
 }
 
 template <typename T>
 nn::ANN_MLP<T>::ANN_MLP()
-    : nEpochs(0), flags(0), normal_distribution(0, 1), uniform_real_distribution(0, 1),
-      uniform_int_distribution(0, RAND_MAX)
+    : nEpochs(0), population_strategy_(PopulationStrategy::MIXED), random_injection_ratio_(0.15),
+      normal_distribution(0, 1), uniform_real_distribution(0, 1), uniform_int_distribution(0, RAND_MAX)
 {
 }
 
@@ -32,8 +32,9 @@ template <typename T> nn::ANN_MLP<T>::ANN_MLP::~ANN_MLP() = default;
 template <typename T>
 nn::ANN_MLP<T>::ANN_MLP(std::vector<size_t> size, int seed, size_t populationSize, size_t topPerformersSize,
                         size_t activationFunction)
-    : vSize(size), nEpochs(0), nPopSize(populationSize), nTop(topPerformersSize), act(activationFunction), flags(0),
-      normal_distribution(0, 1), uniform_real_distribution(0, 1), uniform_int_distribution(0, RAND_MAX)
+    : vSize(size), nEpochs(0), nPopSize(populationSize), nTop(topPerformersSize), act(activationFunction),
+      population_strategy_(PopulationStrategy::MIXED), random_injection_ratio_(0.15), normal_distribution(0, 1),
+      uniform_real_distribution(0, 1), uniform_int_distribution(0, RAND_MAX)
 {
     assert(nPopSize >= nTop);
     nLayers = size.size();
@@ -43,7 +44,7 @@ nn::ANN_MLP<T>::ANN_MLP(std::vector<size_t> size, int seed, size_t populationSiz
 
 template <typename T> int nn::ANN_MLP<T>::GetVersion() const
 {
-    return nnflags::NNVersion::V1;
+    return nnflags::NNVersion::V2;
 }
 
 template <typename T> void nn::ANN_MLP<T>::AllocateWeightsBiases()
@@ -142,7 +143,8 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     h5.write("NN/" + sName + "/nTop", nTop);
     h5.write("NN/" + sName + "/nPopSize", nPopSize);
     h5.write("NN/" + sName + "/activationFunction", act);
-    h5.write("NN/" + sName + "/flags", flags);
+    h5.write("NN/" + sName + "/populationStrategy", static_cast<int>(population_strategy_));
+    h5.write("NN/" + sName + "/randomInjectionRatio", random_injection_ratio_);
     // Serialize Mersenne Twister generator status
     std::stringstream ss;
     ss << generator;
@@ -159,9 +161,9 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     outFile << "nPopSize " << nPopSize << "\n";
     outFile << "nTop " << nTop << "\n";
     outFile << "act " << act << "\n";
-    outFile << "flags " << flags << "\n";
+    outFile << "populationStrategy " << static_cast<int>(population_strategy_) << "\n";
+    outFile << "randomInjectionRatio " << random_injection_ratio_ << "\n";
     outFile << "nLayers " << nLayers << "\n";
-
     outFile << "vSize ";
     for (size_t size : vSize) { outFile << size << " "; }
     outFile << "\n";
@@ -222,8 +224,11 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
     h5.read("NN/" + sName + "/nPopSize", nPopSize);
     h5.read("NN/" + sName + "/nTop", nTop);
     h5.read("NN/" + sName + "/activationFunction", act);
+    int temp_ps_h5;
+    h5.read("NN/" + sName + "/populationStrategy", temp_ps_h5);
+    population_strategy_ = static_cast<PopulationStrategy>(temp_ps_h5);
+    h5.read("NN/" + sName + "/randomInjectionRatio", random_injection_ratio_);
     h5.read("NN/" + sName + "/vSize", vSize);
-    h5.read("NN/" + sName + "/flags", flags);
 
     vBiases  = {};
     vWeights = {};
@@ -271,7 +276,13 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
         else if (key == "nPopSize") ss_line >> nPopSize;
         else if (key == "nTop") ss_line >> nTop;
         else if (key == "act") ss_line >> act;
-        else if (key == "flags") ss_line >> flags;
+        else if (key == "populationStrategy")
+        {
+            int temp_ps_txt;
+            ss_line >> temp_ps_txt;
+            population_strategy_ = static_cast<PopulationStrategy>(temp_ps_txt);
+        }
+        else if (key == "randomInjectionRatio") ss_line >> random_injection_ratio_;
         else if (key == "nLayers") ss_line >> nLayers;
         else if (key == "vSize")
         {
