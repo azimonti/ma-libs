@@ -88,6 +88,7 @@ if(CPP_LIBNN OR BUILDSUITE)
     if(UNITYBUILD)
       set_property( TARGET ${PROJECT_NAME}     PROPERTY UNITY_BUILD ON                     )
     endif()
+    target_compile_definitions( ${PROJECT_NAME}       PRIVATE USE_BLAS  CPP_NN_PY_BIND     )
 
     target_link_libraries( ${PROJECT_NAME} PRIVATE cpp_nnstatic)
   endif()
@@ -202,7 +203,7 @@ if(CPP_LIBNN_BLAS )
       set_property( TARGET ${PROJECT_NAME}        PROPERTY UNITY_BUILD ON                     )
     endif()
 
-    target_compile_definitions( ${PROJECT_NAME}       PRIVATE USE_BLAS                        )
+    target_compile_definitions( ${PROJECT_NAME}       PRIVATE USE_BLAS  CPP_NN_PY_BLAS_BIND   )
     target_link_libraries( ${PROJECT_NAME} PRIVATE
       $<$<CONFIG:Debug>:cpp_nn_blasd>
       $<$<NOT:$<CONFIG:Debug>>:cpp_nn_blas>
@@ -334,7 +335,7 @@ if(CPP_LIBNN_BLAS_HDF5 )
       set_property( TARGET ${PROJECT_NAME}        PROPERTY UNITY_BUILD ON                     )
     endif()
 
-    target_compile_definitions( ${PROJECT_NAME}       PRIVATE USE_BLAS USE_HDF5               )
+    target_compile_definitions( ${PROJECT_NAME}  PRIVATE USE_BLAS USE_HDF5 CPP_NN_PY_BLAS_HDF5_BIND  )
     target_link_libraries( ${PROJECT_NAME} PRIVATE
       $<$<CONFIG:Debug>:cpp_nn_blas_hdf5d>
       $<$<NOT:$<CONFIG:Debug>>:cpp_nn_blas_hdf5>

@@ -1,10 +1,10 @@
 /************************/
 /*    ann_mlp_v1.cpp    */
-/*    Version 2.1       */
-/*     2025/05/10       */
+/*    Version 2.0       */
+/*     2025/05/11       */
 /************************/
 
-#include <algorithm> // For std::find
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <fstream>

@@ -1,7 +1,7 @@
 /*******************************/
 /* ann_mlp_ga_py_interface.cpp */
 /*         Version 2.0         */
-/*          2025/05/10         */
+/*          2025/05/11         */
 /*******************************/
 
 #include <pybind11/numpy.h>
@@ -69,11 +69,14 @@ template <typename T> void bind_ann_mlp_ga_class(py::module& m, const std::strin
         .def("GetRandomInjectionRatio", &Class::GetRandomInjectionRatio, "Gets the current random injection ratio.");
 }
 
-#if defined USE_BLAS
+#if defined(CPP_NN_PY_BIND)
 PYBIND11_MODULE(cpp_nn_py, m)
+#elif defined(CPP_NN_PY_BLAS_BIND)
+PYBIND11_MODULE(cpp_nn_blas_py, m)
+#elif defined(CPP_NN_PY_BLAS_HDF5_BIND)
+PYBIND11_MODULE(cpp_nn_blas_hdf5_py, m)
 #else
-// simpler interface without BLAS nor HDF5 dependencies
-PYBIND11_MODULE(cpp_nn_py2, m)
+#error "Define one of: CPP_NN_PY_BIND, CPP_NN_PY_BLAS_BIND, CPP_NN_PY_BLAS_HDF5_BIND"
 #endif
 {
     m.doc() = "pybind11 plugin for ANN_MLP_GA";
