@@ -165,7 +165,7 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     h5.write("NN/" + sName + "/generator", ss.str());
 #else
     // Text-based serialization
-    std::ofstream outFile(fname, std::ios::binary);
+    std::ofstream outFile(fname);
     if (!outFile.is_open()) { throw std::runtime_error("Could not open file for writing: " + fname); }
 
     int v_text = GetVersion();
@@ -275,7 +275,7 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
     ss >> generator;
 #else
     // Text-based deserialization
-    std::ifstream inFile(fname, std::ios::binary);
+    std::ifstream inFile(fname);
     if (!inFile.is_open()) { throw std::runtime_error("Could not open file for reading: " + fname); }
 
     std::string line, key;

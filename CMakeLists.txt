@@ -8,11 +8,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 set(CPP_LIBALG_LAPACK_BUILT_FROM_ROOT ON)
 
 # C++ Libraries
-if(CPP_LIBALG_LAPACK OR CPP_LIBNN OR BUILDSUITE)
+if(CPP_LIBALG_LAPACK OR CPP_LIBNN_BLAS OR CPP_LIBNN_BLAS_HDF5 OR BUILDSUITE)
   add_subdirectory( cpp/libalg_lapack/     )
 endif()
 
-if(CPP_LIBNN OR BUILDSUITE)
+if(CPP_LIBNN OR CPP_LIBNN_BLAS OR CPP_LIBNN_BLAS_HDF5 OR BUILDSUITE)
   add_subdirectory( cpp/libnn/             )
 endif()
 

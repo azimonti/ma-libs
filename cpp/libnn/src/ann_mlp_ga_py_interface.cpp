@@ -60,8 +60,6 @@ template <typename T> void bind_ann_mlp_ga_class(py::module& m, const std::strin
         return self.feedforward(pInputs, inputsSize, memberid);
     }, py::arg("inputs"), py::arg("memberid"))
 
-        .def("TrainGA", &Class::TrainGA)
-        .def("TestGA", &Class::TestGA)
         .def("CreatePopulation", &Class::CreatePopulation)
         .def("GetNetworkSizeDim", &Class::GetNetworkSizeDim)
         .def("GetNetworkSize", &Class::GetNetworkSize)

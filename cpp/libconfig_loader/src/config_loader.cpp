@@ -42,8 +42,7 @@ namespace Config
     bool loadConfiguration(const std::string& filepath)
     {
         s_rawConfig.clear(); // Clear previous configuration
-        std::ifstream configFile(filepath,
-                                 std::ios::binary); // std::ios::binary is unusual for text but getline should handle it
+        std::ifstream configFile(filepath);
         if (!configFile.is_open())
         {
             if (s_verbose_errors) std::cerr << "Error: Could not open configuration file: " << filepath << std::endl;
