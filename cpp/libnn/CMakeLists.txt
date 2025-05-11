@@ -15,7 +15,7 @@ set ( SRCS
   ./src/ann_mlp_ga_v1.cpp
   ./src/ann_mlp_sgd_v1.cpp
 )
-   add_compile_options(-Wall -Wextra -pedantic -Wconversion -Wno-float-conversion)
+
 set ( SRCS_DEPS_LOG
   ../utils/log/log.cpp
 )
