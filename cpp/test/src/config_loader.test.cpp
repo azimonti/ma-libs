@@ -388,6 +388,43 @@ TEST_CASE_FIXTURE(ConfigFixture, "[config_loader] Extended Value Retrieval and E
         CHECK(Config::getBool("Test.InvalidBool", true) == true);
         CHECK(Config::getBool("Test.InvalidBool", false) == false);
     }
+
+    SUBCASE("Comment Handling - String")
+    {
+        // Test.StringWithComment = ValueString    # This is a comment
+        CHECK(Config::getString("Test.StringWithComment") == "ValueString");
+    }
+    SUBCASE("Comment Handling - Int")
+    {
+        // Test.IntWithComment = 987  # Another comment here
+        CHECK(Config::getInt("Test.IntWithComment") == 987);
+    }
+    SUBCASE("Comment Handling - Double")
+    {
+        // Test.DoubleWithComment = 123.456   # Comment after spaces
+        CHECK(Config::getDouble("Test.DoubleWithComment") == doctest::Approx(123.456));
+    }
+    SUBCASE("Comment Handling - Float")
+    {
+        // Test.FloatWithComment = 7.89  # Float comment
+        CHECK(Config::getFloat("Test.FloatWithComment") == doctest::Approx(7.89f));
+    }
+    SUBCASE("Comment Handling - Bool True")
+    {
+        // Test.BoolTrueWithComment = true   # Bool true comment
+        CHECK(Config::getBool("Test.BoolTrueWithComment") == true);
+    }
+    SUBCASE("Comment Handling - Bool False")
+    {
+        // Test.BoolFalseWithComment = false # Bool false comment
+        CHECK(Config::getBool("Test.BoolFalseWithComment") == false);
+    }
+    SUBCASE("Comment Handling - Vector")
+    {
+        // Test.VectorWithComment = one, two, three # Vector comment
+        std::vector<std::string> expected_vec = {"one", "two", "three"};
+        CHECK(Config::getVectorString("Test.VectorWithComment") == expected_vec);
+    }
 }
 
 TEST_SUITE_END();

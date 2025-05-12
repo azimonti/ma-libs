@@ -57,3 +57,12 @@ Test.MalformedIntForThrow = 123xyz
 Test.IntWithExtraForThrow = 789 jkl
 Test.MalformedBoolForThrow = maybe
 Test.GoodVectorInt = 1,2,3,4
+
+# New data for comment handling
+Test.StringWithComment = ValueString    # This is a comment
+Test.IntWithComment = 987  # Another comment here
+Test.DoubleWithComment = 123.456   # Comment after spaces
+Test.FloatWithComment = 7.89  # Float comment
+Test.BoolTrueWithComment = true   # Bool true comment
+Test.BoolFalseWithComment = false # Bool false comment
+Test.VectorWithComment = one, two, three # Vector comment

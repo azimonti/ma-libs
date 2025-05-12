@@ -28,6 +28,16 @@ namespace Config
         return str.substr(first, (last - first + 1));
     }
 
+    // Helper function to remove comments and trim trailing whitespace from a value string
+    static std::string trimValueAndRemoveComment(const std::string& str)
+    {
+        size_t commentPos     = str.find('#');
+        std::string valuePart = (commentPos == std::string::npos) ? str : str.substr(0, commentPos);
+
+        // Trim both leading and trailing whitespace from the value part
+        return trim(valuePart);
+    }
+
     // Helper function to split a string by a delimiter
     static std::vector<std::string> split(const std::string& s, char delimiter)
     {
@@ -62,7 +72,8 @@ namespace Config
             if (delimiterPos == std::string::npos) { continue; }
 
             std::string key   = trim(line.substr(0, delimiterPos));
-            std::string value = trim(line.substr(delimiterPos + 1));
+            // Use the new helper to clean the value before storing
+            std::string value = trimValueAndRemoveComment(line.substr(delimiterPos + 1));
 
             if (key.empty()) { continue; }
             s_rawConfig[key] = value;
