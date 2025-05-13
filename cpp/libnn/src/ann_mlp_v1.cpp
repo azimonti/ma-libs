@@ -165,7 +165,7 @@ template <typename T> void nn::ANN_MLP<T>::Serialize(const std::string& fname)
     h5.write("NN/" + sName + "/generator", ss.str());
 #else
     // Text-based serialization
-    std::ofstream outFile(fname);
+    std::ofstream outFile(fname, std::ios::binary);
     if (!outFile.is_open()) { throw std::runtime_error("Could not open file for writing: " + fname); }
 
     int v_text = GetVersion();
@@ -275,13 +275,16 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
     ss >> generator;
 #else
     // Text-based deserialization
-    std::ifstream inFile(fname);
+    std::ifstream inFile(fname, std::ios::binary);
     if (!inFile.is_open()) { throw std::runtime_error("Could not open file for reading: " + fname); }
 
     std::string line, key;
 
     while (std::getline(inFile, line))
     {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
         std::stringstream ss_line(line); // Use ss_line for parsing each line
         ss_line >> key;
 
@@ -321,6 +324,9 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
             size_t rows = 0, cols = 0;
             while (std::getline(inFile, line) && line != "vBiases_end")
             {
+                if (!line.empty() && line.back() == '\r') {
+                    line.pop_back();
+                }
                 std::stringstream ss_bias(line);
                 std::string bias_key;
                 ss_bias >> bias_key;
@@ -343,6 +349,9 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
                         { // Read subsequent lines for the same matrix
                             if (!std::getline(inFile, line))
                                 throw std::runtime_error("Unexpected EOF in bias matrix data");
+                            if (!line.empty() && line.back() == '\r') {
+                                line.pop_back();
+                            }
                             ss_data.clear();
                             ss_data.str(line);
                         }
@@ -365,6 +374,9 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
             size_t rows = 0, cols = 0;
             while (std::getline(inFile, line) && line != "vWeights_end")
             {
+                if (!line.empty() && line.back() == '\r') {
+                    line.pop_back();
+                }
                 std::stringstream ss_weight(line);
                 std::string weight_key;
                 ss_weight >> weight_key;
@@ -387,6 +399,9 @@ template <typename T> void nn::ANN_MLP<T>::Deserialize(const std::string& fname)
                         { // Read subsequent lines for the same matrix
                             if (!std::getline(inFile, line))
                                 throw std::runtime_error("Unexpected EOF in weight matrix data");
+                            if (!line.empty() && line.back() == '\r') {
+                                line.pop_back();
+                            }
                             ss_data.clear();
                             ss_data.str(line);
                         }
